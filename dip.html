@@ -10,106 +10,33 @@ body{background:#e9edf2;padding:12px;color:#333}
 .container{max-width:100%;margin:0 auto;background:#fff;padding:16px;border-radius:8px}
 h2{text-align:center;margin-bottom:12px;font-size:19px}
 .title{font-size:14px;font-weight:bold;margin:10px 0 5px;color:#2d6edb}
-/* 料號規格資訊欄 */
-.spec-info{
-    background:#f5f5f5;
-    padding:10px;
-    border-radius:6px;
-    margin-bottom:12px;
-    font-size:14px;
-    line-height:1.8;
-}
+.spec-info{background:#f5f5f5;padding:10px;border-radius:6px;margin-bottom:12px;font-size:14px;line-height:1.8}
 .select-box{width:100%;padding:8px;margin-bottom:10px;border:1px #ccc solid;border-radius:4px;font-size:14px}
-
-.input-grid{
-    display:grid;
-    grid-template-columns: repeat(4, minmax(0,1fr));
-    gap:5px;
-    margin-bottom:8px;
-}
-.input-grid input{
-    padding:8px;
-    border:1px #ccc solid;
-    border-radius:4px;
-    text-align:center;
-    font-size:14px;
-    width:100%;
-}
-/* 模塊色彩區分 */
-.block-reverse{
-    background:#f0f7ff;
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:12px;
-}
-.block-forward{
-    background:#f0fff4;
-    padding:12px;
-    border-radius:8px;
-}
+.input-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:8px}
+.input-grid input{padding:8px;border:1px #ccc solid;border-radius:4px;text-align:center;font-size:14px;width:100%}
+.block-reverse{background:#f0f7ff;padding:12px;border-radius:8px;margin-bottom:12px}
+.block-forward{background:#f0fff4;padding:12px;border-radius:8px}
 .btn-group{display:flex;gap:6px;margin:8px 0}
-button{flex:1;padding:8px;border:none;border-radius:4px;color:#fff;font-size:14px}
+button{flex:1;padding:8px;border:none;border-radius:4px;color:#fff;font-size:14px;cursor:pointer}
 .btn-calc-blue{background:#2d6edb}
 .btn-calc-green{background:#28a745}
 .btn-reset{background:#666}
 .result{margin-top:8px;padding:10px;border-radius:6px;line-height:1.6;font-size:14px;background:#ffffff}
 .line{margin:10px 0;border-top:1px #ddd solid}
-
-/* 自訂確認彈窗樣式，替換原生confirm，按鈕改為正確/錯誤 */
-.custom-modal{
-    position:fixed;
-    top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,0.5);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-}
-.modal-box{
-    background:#fff;
-    width:85%;
-    max-width:400px;
-    padding:20px;
-    border-radius:8px;
-}
-.modal-text{
-    font-size:15px;
-    line-height:1.7;
-    margin-bottom:18px;
-}
-.modal-btn-group{
-    display:flex;
-    gap:10px;
-}
-.modal-btn-wrong{
-    flex:1;
-    padding:10px;
-    background:#dc3545;
-    color:#fff;
-    border:none;
-    border-radius:4px;
-    font-size:15px;
-}
-.modal-btn-right{
-    flex:1;
-    padding:10px;
-    background:#28a745;
-    color:#fff;
-    border:none;
-    border-radius:4px;
-    font-size:15px;
-}
-.hide{
-    display:none;
-}
+.custom-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999}
+.modal-box{background:#fff;width:85%;max-width:400px;padding:20px;border-radius:8px}
+.modal-text{font-size:15px;line-height:1.7;margin-bottom:18px}
+.modal-btn-group{display:flex;gap:10px}
+.modal-btn-wrong{flex:1;padding:10px;background:#dc3545;color:#fff;border:none;border-radius:4px;font-size:15px}
+.modal-btn-right{flex:1;padding:10px;background:#28a745;color:#fff;border:none;border-radius:4px;font-size:15px}
+.hide{display:none}
 </style>
 </head>
 <body>
 <div class="container">
 <h2>盤點 領料</h2>
 
-<!-- 下拉選單只保留5個原始料號，簡化選項文字 -->
-<select class="select-box" id="pnSel" onchange="refreshSpecInfo()">
+<select class="select-box" id="pnSel">
 <option value="1">064-0311-000</option>
 <option value="2">064-0315-000</option>
 <option value="3">064-0352-000</option>
@@ -117,10 +44,8 @@ button{flex:1;padding:8px;border:none;border-radius:4px;color:#fff;font-size:14p
 <option value="5">320-1280-000</option>
 </select>
 
-<!-- 規格顯示區，嚴格按照你指定格式渲染 -->
 <div class="spec-info" id="specInfo"></div>
 
-<!-- 藍色模塊：盤點 -->
 <div class="block-reverse">
 <div class="title">盤點</div>
 <div class="input-grid">
@@ -130,213 +55,199 @@ button{flex:1;padding:8px;border:none;border-radius:4px;color:#fff;font-size:14p
 <input type="number" id="ke" placeholder="顆">
 </div>
 <input type="number" class="select-box" id="stockTotalReverse" placeholder="輸入當前系統總庫存顆數">
-<button class="btn-calc-blue" onclick="openModal('reverse')">計算盤點差異</button>
+<button class="btn-calc-blue" id="reverseBtn" type="button">計算盤點差異</button>
 <div class="result" id="fanResult"></div>
 </div>
 
 <div class="line"></div>
 
-<!-- 綠色模塊：領料 -->
 <div class="block-forward">
 <div class="title">領料</div>
 <input type="number" class="select-box" id="totalKe" placeholder="輸入本次需求領取總顆數">
 <input type="number" class="select-box" id="stockTotalForward" placeholder="輸入領料原始總庫存顆數">
 <div class="btn-group">
-<button class="btn-calc-green" onclick="openModal('forward')">拆解領料數量</button>
-<button class="btn-reset" onclick="resetAll()">全部重置清空</button>
+<button class="btn-calc-green" id="forwardBtn" type="button">拆解領料數量</button>
+<button class="btn-reset" id="resetBtn" type="button">全部重置清空</button>
 </div>
 <div class="result" id="zhengResult"></div>
 </div>
-
 </div>
 
-<!-- 自訂確認彈窗 -->
 <div class="custom-modal hide" id="confirmModal">
     <div class="modal-box">
         <div class="modal-text" id="modalText"></div>
         <div class="modal-btn-group">
-            <button class="modal-btn-wrong" onclick="modalWrong()">錯誤</button>
-            <button class="modal-btn-right" onclick="modalRight()">正確</button>
+            <button class="modal-btn-wrong" id="modalWrongBtn" type="button">錯誤</button>
+            <button class="modal-btn-right" id="modalRightBtn" type="button">正確</button>
         </div>
     </div>
 </div>
 
 <script>
-// 嚴格對應你每一支料號、替代PN、固定包裝數值
-const spec = [
-  {
-    pn:"064-0311-000",
-    altPn:"10137002-101LF",
-    xiangHe:5,
-    heTiao:6,
-    tiaoKe:33,
-    totalCarton:990,
-    totalBox:198
-  },
-  {
-    pn:"064-0315-000",
-    altPn:"10061289-001LF",
-    xiangHe:5,
-    heTiao:6,
-    tiaoKe:34,
-    totalCarton:1020,
-    totalBox:204
-  },
-  {
-    pn:"064-0352-000",
-    altPn:"10131762-301LF",
-    xiangHe:5,
-    heTiao:2,
-    tiaoKe:33,
-    totalCarton:330,
-    totalBox:66
-  },
-  {
-    pn:"064-0332-000",
-    altPn:"10028917-001LF",
-    xiangHe:5,
-    heTiao:6,
-    tiaoKe:50,
-    totalCarton:1500,
-    totalBox:300
-  },
-  {
-    pn:"320-1280-000",
-    altPn:"10037909-101LF",
-    xiangHe:5,
-    heTiao:4,
-    tiaoKe:85,
-    totalCarton:1700,
-    totalBox:340
-  }
-]
+document.addEventListener('DOMContentLoaded', function(){
+  const spec = [
+    {pn:'064-0311-000',altPn:'10137002-101LF',xiangHe:5,heTiao:6,tiaoKe:33,totalCarton:990,totalBox:198},
+    {pn:'064-0315-000',altPn:'10061289-001LF',xiangHe:5,heTiao:6,tiaoKe:34,totalCarton:1020,totalBox:204},
+    {pn:'064-0352-000',altPn:'10131762-301LF',xiangHe:5,heTiao:2,tiaoKe:33,totalCarton:330,totalBox:66},
+    {pn:'064-0332-000',altPn:'10028917-001LF',xiangHe:5,heTiao:6,tiaoKe:50,totalCarton:1500,totalBox:300},
+    {pn:'320-1280-000',altPn:'10037909-101LF',xiangHe:5,heTiao:4,tiaoKe:85,totalCarton:1700,totalBox:340}
+  ];
 
-let currentCalcType = '';
+  const pnSel = document.getElementById('pnSel');
+  const specInfo = document.getElementById('specInfo');
+  const confirmModal = document.getElementById('confirmModal');
+  const modalText = document.getElementById('modalText');
+  const fanResult = document.getElementById('fanResult');
+  const zhengResult = document.getElementById('zhengResult');
+  const xiang = document.getElementById('xiang');
+  const he = document.getElementById('he');
+  const tiao = document.getElementById('tiao');
+  const ke = document.getElementById('ke');
+  const stockTotalReverse = document.getElementById('stockTotalReverse');
+  const totalKe = document.getElementById('totalKe');
+  const stockTotalForward = document.getElementById('stockTotalForward');
 
-// 完全按照你指定排版格式渲染規格資訊
-function refreshSpecInfo(){
-  let idx = Number(pnSel.value)-1
-  let s = spec[idx]
-  document.getElementById('specInfo').innerHTML = `
+  let currentCalcType = '';
+
+  function refreshSpecInfo(){
+    const idx = Number(pnSel.value) - 1;
+    const s = spec[idx];
+    if(!s) return;
+    specInfo.innerHTML = `
 料號：${s.pn}<br>
 PN：${s.altPn}<br>
 【1箱${s.xiangHe}盒】 【1盒${s.heTiao}條】 【1條${s.tiaoKe}顆】<br>
 1箱 = ${s.totalCarton}顆 ｜ 1盒 = ${s.totalBox}顆 ｜ 1條 = ${s.tiaoKe}顆
-  `
-}
-refreshSpecInfo();
+    `;
+  }
 
-// 開啟自訂彈窗
-function openModal(type){
+  function openModal(type){
     currentCalcType = type;
-    let idx = Number(pnSel.value)-1;
-    let s = spec[idx];
-    document.getElementById('modalText').innerHTML = 請確認當前料號是否正確：<strong>${s.pn}</strong><br>對應PN：<strong>${s.altPn}</strong><br><br>備註：請再次核對外箱數量是否正確;
-    document.getElementById('confirmModal').classList.remove('hide');
-}
+    const idx = Number(pnSel.value) - 1;
+    const s = spec[idx];
+    if(!s) return;
+    modalText.innerHTML = `請確認當前料號是否正確：<strong>${s.pn}</strong><br>對應PN：<strong>${s.altPn}</strong><br><br>備註：請再次核對外箱數量是否正確`;
+    confirmModal.classList.remove('hide');
+  }
 
-// 點擊【錯誤】：關閉彈窗，焦點跳轉到料號下拉選擇框
-function modalWrong(){
-    document.getElementById('confirmModal').classList.add('hide');
-    document.getElementById('pnSel').focus();
-}
+  function modalWrong(){
+    confirmModal.classList.add('hide');
+    pnSel.focus();
+  }
 
-// 點擊【正確】：關閉彈窗，執行對應計算
-function modalRight(){
-    document.getElementById('confirmModal').classList.add('hide');
+  function modalRight(){
+    confirmModal.classList.add('hide');
     if(currentCalcType === 'reverse'){
-        fanXiang();
+      fanXiang();
     }else if(currentCalcType === 'forward'){
-        zhengXiang();
+      zhengXiang();
     }
-}
+  }
 
-// 盤點計算
-function fanXiang(){
-  let idx = Number(pnSel.value)-1
-  let s = spec[idx]
+  function fanXiang(){
+    const idx = Number(pnSel.value) - 1;
+    const s = spec[idx];
+    if(!s) return;
 
-  let x = Number(xiang.value)||0
-  let h = Number(he.value)||0
-  let t = Number(tiao.value)||0
-  let k = Number(ke.value)||0
-  let sysTotal = Number(stockTotalReverse.value)||0
+    const x = Number(xiang.value) || 0;
+    const h = Number(he.value) || 0;
+    const t = Number(tiao.value) || 0;
+    const k = Number(ke.value) || 0;
+    const sysTotal = Number(stockTotalReverse.value) || 0;
 
-  let actualTotal = x*s.totalCarton + h*s.totalBox + t*s.tiaoKe + k
-  let diff = sysTotal - actualTotal
+    const actualTotal = x * s.totalCarton + h * s.totalBox + t * s.tiaoKe + k;
+    const diff = sysTotal - actualTotal;
 
-  let diffCarton = Math.floor(Math.abs(diff)/s.totalCarton)
-  let rem = Math.abs(diff)%s.totalCarton
-  let diffBox = Math.floor(rem/s.totalBox)
-  rem = rem%s.totalBox
-  let diffStrip = Math.floor(rem/s.tiaoKe)
-  let diffPiece = rem%s.tiaoKe
+    const diffAbs = Math.abs(diff);
+    const diffCarton = Math.floor(diffAbs / s.totalCarton);
+    let rem = diffAbs % s.totalCarton;
+    const diffBox = Math.floor(rem / s.totalBox);
+    rem = rem % s.totalBox;
+    const diffStrip = Math.floor(rem / s.tiaoKe);
+    const diffPiece = rem % s.tiaoKe;
 
-  if(diff>0){
-    fanResult.innerHTML = `
+    if(diff > 0){
+      fanResult.innerHTML = `
 料號：${s.pn}（PN：${s.altPn}）<br>
 實物：${x}箱 ${h}盒 ${t}條 ${k}顆<br>
 <br>
 缺料：${diffCarton}箱 ${diffBox}盒 ${diffStrip}條 ${diffPiece}顆 = ${diff} 顆
-      }else if(diff<0){     fanResult.innerHTML =
+      `;
+    }else if(diff < 0){
+      fanResult.innerHTML = `
 料號：${s.pn}（PN：${s.altPn}）<br>
 實物：${x}箱 ${h}盒 ${t}條 ${k}顆<br>
 <br>
-多料：${diffCarton}箱 ${diffBox}盒 ${diffStrip}條 ${diffPiece}顆 = ${Math.abs(diff)} 顆
-      }else{     fanResult.innerHTML =
+多料：${diffCarton}箱 ${diffBox}盒 ${diffStrip}條 ${diffPiece}顆 = ${diffAbs} 顆
+      `;
+    }else{
+      fanResult.innerHTML = `
 料號：${s.pn}（PN：${s.altPn}）<br>
 實物：${x}箱 ${h}盒 ${t}條 ${k}顆<br>
 <br>
 盤點完全吻合，無缺料、無多料
-    `
+      `;
+    }
   }
-}
 
-// 領料拆解計算
-function zhengXiang(){
-  let idx = Number(pnSel.value)-1
-  let s = spec[idx]
+  function zhengXiang(){
+    const idx = Number(pnSel.value) - 1;
+    const s = spec[idx];
+    if(!s) return;
 
-  let needTotal = Number(totalKe.value)
-  let stockOrigin = Number(stockTotalForward.value)||0
-  if(needTotal<=0){zhengResult.innerHTML="請輸入大於0的需求數值";return}
+    const needTotal = Number(totalKe.value);
+    const stockOrigin = Number(stockTotalForward.value) || 0;
+    if(!needTotal || needTotal <= 0){
+      zhengResult.innerHTML = '請輸入大於0的需求數值';
+      return;
+    }
 
-  let carton = Math.floor(needTotal / s.totalCarton)
-  let rem = needTotal % s.totalCarton
-  let box = Math.floor(rem / s.totalBox)
-  rem = rem % s.totalBox
-  let strip = Math.floor(rem / s.tiaoKe)
-  let piece = rem % s.tiaoKe
+    const carton = Math.floor(needTotal / s.totalCarton);
+    let rem = needTotal % s.totalCarton;
+    const box = Math.floor(rem / s.totalBox);
+    rem = rem % s.totalBox;
+    const strip = Math.floor(rem / s.tiaoKe);
+    const piece = rem % s.tiaoKe;
 
-  let remainTotal = stockOrigin - needTotal
-  let remCarton = Math.floor(Math.abs(remainTotal)/s.totalCarton)
-  let rem2 = Math.abs(remainTotal)%s.totalCarton
-  let remBox = Math.floor(rem2/s.totalBox)
-  rem2 = rem2%s.totalBox
-  let remStrip = Math.floor(rem2/s.tiaoKe)
-  let remPiece = rem2%s.tiaoKe
+    const remainTotal = stockOrigin - needTotal;
+    const remainAbs = Math.abs(remainTotal);
+    const remCarton = Math.floor(remainAbs / s.totalCarton);
+    let rem2 = remainAbs % s.totalCarton;
+    const remBox = Math.floor(rem2 / s.totalBox);
+    rem2 = rem2 % s.totalBox;
+    const remStrip = Math.floor(rem2 / s.tiaoKe);
+    const remPiece = rem2 % s.tiaoKe;
 
-  zhengResult.innerHTML = `
+    zhengResult.innerHTML = `
 料號：${s.pn}（PN：${s.altPn}）<br>
 應領：${carton}箱 ${box}盒 ${strip}條 ${piece}顆<br>
 <br>
 剩餘庫存：${remCarton}箱 ${remBox}盒 ${remStrip}條 ${remPiece}顆 = ${remainTotal} 顆
-  `
-}
+    `;
+  }
 
-// 一鍵全部清空
-function resetAll(){
-  xiang.value = ''
-  he.value = ''
-  tiao.value = ''
-  ke.value = ''
-  stockTotalReverse.value = ''
-  totalKe.value = ''
-  stockTotalForward.value = ''
-  fanResult.innerHTML = ""
-  zhengResult.innerHTML = ""
+  function resetAll(){
+    xiang.value = '';
+    he.value = '';
+    tiao.value = '';
+    ke.value = '';
+    stockTotalReverse.value = '';
+    totalKe.value = '';
+    stockTotalForward.value = '';
+    fanResult.innerHTML = '';
+    zhengResult.innerHTML = '';
+    refreshSpecInfo();
+  }
+
+  pnSel.addEventListener('change', refreshSpecInfo);
+  document.getElementById('reverseBtn').addEventListener('click', function(){ openModal('reverse'); });
+  document.getElementById('forwardBtn').addEventListener('click', function(){ openModal('forward'); });
+  document.getElementById('resetBtn').addEventListener('click', resetAll);
+  document.getElementById('modalWrongBtn').addEventListener('click', modalWrong);
+  document.getElementById('modalRightBtn').addEventListener('click', modalRight);
+
   refreshSpecInfo();
-}
+});
 </script>
 </body>
 </html>
