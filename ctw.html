@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>A4表格產生器</title>
+
+<style id="pageStyle">
+@page{
+    size:A4 landscape;
+    margin:5mm;
+    @top-left: "";
+    @top-right: "";
+    @bottom-left: "";
+    @bottom-right: "";
+}
+</style>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:-apple-system,BlinkMacSystemFont,"微軟正黑體",sans-serif;
+}
+
+body{
+    background:#f2f3f5;
+    padding:6px;
+    color:#111827;
+}
+
+/* 新增：返回主頁按鈕區 */
+.top-nav-bar{
+    text-align:center;
+    margin-bottom:8px;
+}
+
+/* 列印按鈕：頂部獨立區塊 + 柔和綠色 */
+.top-print-bar{
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.set-panel{
+    background:#fff;
+    border-radius:10px;
+    padding:7px;
+    margin-bottom:6px;
+    box-shadow:0 1px 5px rgba(0,0,0,.06);
+}
+
+.set-panel h3{
+    font-size:13px;
+    margin-bottom:6px;
+    font-weight:700;
+}
+
+.row-item{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-bottom:5px;
+    align-items:center;
+}
+
+.input-wrap{
+    position:relative;
+    flex:1;
+    min-width:60px;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    height:24px;
+    padding:0 7px;
+    border:1px solid #d1d5db;
+    border-radius:7px;
+    font-size:12px;
+    outline:none;
+    background:#fff;
+    color:#111827;
+}
+
+textarea{
+    height:44px;
+    resize:none;
+    padding:4px 7px;
+    line-height:1.4;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#3b82f6;
+    box-shadow:0 0 0 2px rgba(59,130,246,.12);
+}
+
+.hint-text{
+    position:absolute;
+    right:7px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#b3b3b3;
+    font-size:11px;
+    pointer-events:none;
+    white-space:nowrap;
+    user-select:none;
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+.hide-hints .hint-text{
+    display:none !important;
+}
+
+.btn{
+    height:24px;
+    padding:0 9px;
+    border:none;
+    border-radius:8px;
+    color:#fff;
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+    flex-shrink:0;
+    transition: all 0.15s ease;
+}
+.btn:active{
+    transform: scale(0.95);
+    opacity: 0.9;
+}
+
+.btn{
+    background:#2563eb;
+}
+.btn:hover{
+    background:#1d4ed8;
+}
+
+.btn-secondary{
+    background:#6b7280;
+    min-width:110px;
+}
+.btn-secondary:hover{
+    background:#4b5563;
+}
+
+.btn-print{
+    background-color: #57b988;
+}
+.btn-print:hover{
+    background-color: #45a475;
+}
+
+/* 新增：返回主頁按鈕樣式 */
+.btn-home{
+    background:#f59e0b;
+}
+.btn-home:hover{
+    background:#d97706;
+}
+
+.preview-wrap{
+    background:#fff;
+    border-radius:10px;
+    padding:10px;
+    box-shadow:0 1px 5px rgba(0,0,0,.06);
+    overflow:auto;
+}
+
+.header-info{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 11px;
+    margin-bottom:12px;
+    padding-top: 4px;
+}
+
+.left-base-info{
+    color: #000;
+    font-weight: bold;
+    line-height: 1.8;
+}
+
+.right-time-info{
+    text-align: right;
+    line-height: 1.8;
+    color:#6b7280;
+    font-size: 12px;
+}
+
+.table-title{
+    text-align:center;
+    font-weight:bold;
+    margin-bottom:10px;
+    min-height:14px;
+}
+
+.edit-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+.edit-table th,
+.edit-table td{
+    border:1px solid #000;
+    text-align:center;
+    padding:3px 2px;
+    font-size:11px;
+    word-break:break-word;
+}
+
+.edit-table th{
+    background:#f5f5f5;
+}
+
+.edit-table td{
+    min-height:15px;
+    height:16px;
+}
+
+.edit-table td[contenteditable]{
+    cursor:text;
+}
+
+.edit-table td[contenteditable]:focus{
+    outline:none;
+    background:#eef4ff;
+}
+
+.table-remark{
+    margin-top:8px;
+    font-size:11px;
+    color:#b3b3b3;
+    opacity:0.85;
+    min-height:14px;
+}
+
+@media (max-width:768px){
+    .input-wrap{
+        min-width:calc(50% - 3px);
+    }
+    .btn{
+        flex:1;
+        min-width:60px;
+    }
+}
+
+@page landscape {
+    size:A4 landscape;
+    margin:5mm;
+    @top-left: "";
+    @top-right: "";
+    @bottom-left: "";
+    @bottom-right: "";
+}
+
+@media print{
+    html,
+    body{
+        width:100%;
+        height:100%;
+        background:#fff;
+        padding:0;
+        margin:0;
+    }
+
+    .set-panel,
+    .top-print-bar,
+    .top-nav-bar{
+        display:none !important;
+    }
+
+    .preview-wrap{
+        box-shadow:none;
+        border-radius:0;
+        padding:0;
+        margin:0;
+        width:100%;
+    }
+
+    .header-info{
+        position:fixed;
+        top:5mm;
+        left:5mm;
+        right:5mm;
+        font-size:11px;
+        margin:0;
+        padding:0;
+    }
+    .left-base-info {
+        line-height: 1.8;
+    }
+    .right-time-info {
+        line-height: 1.8;
+        font-size: 12px;
+    }
+
+    .table-title{
+        margin-top: 25mm;
+        margin-bottom:8px;
+    }
+
+    .edit-table{
+        width:100%;
+    }
+
+    .edit-table tr{
+        page-break-inside:avoid;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 新增：返回主頁按鈕 -->
+<div class="top-nav-bar">
+    <button class="btn btn-home" onclick="window.location.href='index.html'">返回主頁</button>
+</div>
+
+<div class="top-print-bar">
+    <button class="btn btn-print" onclick="doPrint()">列印表單</button>
+</div>
+
+<div class="set-panel" id="formPanel">
+    <!-- 表單模板 -->
+    <h3>表單模板</h3>
+    <div class="row-item">
+        <div class="input-wrap" style="flex:1 1 100%;">
+            <textarea id="templateCode" placeholder="模板程式碼，貼入後點擊載入"></textarea>
+        </div>
+    </div>
+    <div class="row-item">
+        <button class="btn btn-secondary" onclick="generateTemplate()">生成</button>
+        <button class="btn" onclick="loadTemplate()">載入</button>
+        <button class="btn" onclick="copyTemplate()">複製</button>
+        <button class="btn" onclick="pasteTemplate()">貼上</button>
+        <button class="btn" onclick="clearTemplate()">清除</button>
+    </div>
+
+    <!-- 表單設定：已整合頂端文字設定 -->
+    <h3 style="margin-top:10px;">表單設定</h3>
+
+    <!-- 移除套用按鈕，輸入即時生效 -->
+    <div class="row-item">
+        <div class="input-wrap">
+            <input type="text" id="leftCustomText" value="轉移倉別：">
+            <span class="hint-text">頂端文字</span>
+        </div>
+        <div class="input-wrap">
+            <input type="number" id="leftTextSize" value="20" min="10" max="40">
+            <span class="hint-text">文字大小(px)</span>
+        </div>
+    </div>
+
+    <div class="row-item">
+        <div class="input-wrap">
+            <input type="text" id="titleText" value="PCB/送外倉清點表單">
+            <span class="hint-text">標題文字</span>
+        </div>
+
+        <div class="input-wrap">
+            <input type="number" id="titleSize" value="20" min="10">
+            <span class="hint-text">字號</span>
+        </div>
+
+        <select id="titleAlign">
+            <option value="left">靠左</option>
+            <option value="center" selected>置中</option>
+            <option value="right">靠右</option>
+        </select>
+    </div>
+
+    <div class="row-item">
+        <select id="pageDir">
+            <option value="portrait">A4直向</option>
+            <option value="landscape" selected>A4橫向</option>
+        </select>
+    </div>
+
+    <div class="row-item">
+        <div class="input-wrap">
+            <input type="number" id="colCount" value="7" min="1">
+            <span class="hint-text">欄位數</span>
+        </div>
+
+        <div class="input-wrap">
+            <input type="number" id="rowCount" value="4" min="1">
+            <span class="hint-text">預設列數（批量匯入會自動覆蓋）</span>
+        </div>
+
+        <button class="btn" onclick="renderTable()">產生表格</button>
+    </div>
+
+    <div class="row-item">
+        <div class="input-wrap" style="flex:1 1 auto;">
+            <input type="text" id="colNames" value="棧號，料號，計算公式，QTY，箱，Data Code，轉換日期">
+            <span class="hint-text">欄位名（中文逗號，分隔）</span>
+        </div>
+        <button class="btn btn-secondary" onclick="syncColumn()">欄位同步</button>
+        <button class="btn btn-secondary" onclick="syncWidthByText()">寬度同步</button>
+    </div>
+
+    <div class="row-item">
+        <div class="input-wrap" style="flex:1 1 300px;">
+            <input type="text" id="colWidths" value="30，80，50，30，15，100，70">
+            <span class="hint-text">欄位寬（中文逗號，分隔）</span>
+        </div>
+        <button class="btn btn-secondary" type="button" onclick="toggleHints()" id="hintToggleBtn">隱藏提示</button>
+    </div>
+
+    <!-- 表格內容批量輸入 -->
+    <h3 style="margin-top:10px;">表格內容批量輸入（自動偵測行數建立對應列）</h3>
+    <div class="row-item">
+        <div class="input-wrap" style="flex:1 1 100%;">
+            <textarea id="batchContent" placeholder="格式：列用換行，欄用中文逗號，每一行自動生成一個表格列
+1，A001，10*5，50，5，DC20260616，2026-06-16
+2，A002，20*3，60，3，DC20260616，2026-06-16"></textarea>
+        </div>
+    </div>
+    <div class="row-item">
+        <button class="btn" onclick="fillBatchContent()">自動依據行數建立表格並填充內容</button>
+    </div>
+
+    <!-- 備註內容 -->
+    <div class="row-item" style="margin-top:10px;">
+        <div class="input-wrap" style="flex:1 1 100%;">
+            <textarea id="remarkInput">備註：
+1.計算公式=片數*箱數
+2.轉換日期=Data code日期
+3.工號簽名：</textarea>
+        </div>
+    </div>
+    <div class="row-item">
+        <button class="btn btn-secondary" onclick="setRemarkAlign('left')">靠左</button>
+        <button class="btn btn-secondary" onclick="setRemarkAlign('center')">置中</button>
+        <button class="btn btn-secondary" onclick="setRemarkAlign('right')">靠右</button>
+    </div>
+
+</div>
+
+<div class="preview-wrap">
+    <div class="header-info">
+        <div class="left-base-info" id="leftTextShow">
+            轉移倉別：
+        </div>
+        <div class="right-time-info">
+            製作時間：<span id="createTime"></span><br>
+            列印時間：<span id="printTime">尚未列印</span>
+        </div>
+    </div>
+
+    <div class="table-title" id="titleBox"></div>
+    <div id="tableBox"></div>
+    <div class="table-remark" id="tableRemark"></div>
+</div>
+
+<script>
+let hintsVisible = true;
+let remarkAlign = "left";
+let tableData = [];
+
+// 初始預設模板參數
+const defaultTemplate = {
+  "leftCustomText": "轉移倉別：",
+  "leftTextSize": "20",
+  "titleText": "PCB/送外倉清點表單",
+  "titleSize": "20",
+  "titleAlign": "center",
+  "pageDir": "landscape",
+  "colCount": "7",
+  "rowCount": "4",
+  "colNames": "棧號，料號，計算公式，QTY，箱，Data Code，轉換日期",
+  "colWidths": "30，80，50，30，15，100，70",
+  "remarkInput": "備註：\n1.計算公式=片數*箱數\n2.轉換日期=Data code日期\n3.工號簽名：",
+  "remarkAlign": "left"
+};
+
+// 移除獨立套用按鈕，改為輸入即時更新
+function applyLeftText(){
+    const text = document.getElementById('leftCustomText').value;
+    const size = document.getElementById('leftTextSize').value + 'px';
+    const showDom = document.getElementById('leftTextShow');
+    showDom.innerText = text;
+    showDom.style.fontSize = size;
+}
+
+// 時間格式化
+function formatDateTime(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    const h = String(date.getHours()).padStart(2, "0");
+    const mi = String(date.getMinutes()).padStart(2, "0");
+    return `${y}-${m}-${d} ${h}:${mi}`;
+}
+
+window.onload = function(){
+    // 開頁直接載入預設模板
+    loadObjTemplate(defaultTemplate);
+    const now = new Date();
+    document.getElementById("createTime").innerText = formatDateTime(now);
+    applyLeftText();
+    renderTable();
+};
+
+// 載入物件格式模板
+function loadObjTemplate(template){
+    document.getElementById("leftCustomText").value = template.leftCustomText;
+    document.getElementById("leftTextSize").value = template.leftTextSize;
+    applyLeftText();
+
+    document.getElementById("titleText").value = template.titleText;
+    document.getElementById("titleSize").value = template.titleSize;
+    document.getElementById("titleAlign").value = template.titleAlign;
+    document.getElementById("pageDir").value = template.pageDir;
+    document.getElementById("colCount").value = template.colCount;
+    document.getElementById("rowCount").value = template.rowCount;
+    document.getElementById("colNames").value = template.colNames;
+    document.getElementById("colWidths").value = template.colWidths;
+    document.getElementById("remarkInput").value = template.remarkInput;
+    remarkAlign = template.remarkAlign;
+}
+
+function toggleHints(){
+    hintsVisible = !hintsVisible;
+    const panel = document.getElementById("formPanel");
+    const btn = document.getElementById("hintToggleBtn");
+    if(hintsVisible){
+        panel.classList.remove("hide-hints");
+        btn.innerText = "隱藏提示";
+    }else{
+        panel.classList.add("hide-hints");
+        btn.innerText = "顯示提示";
+    }
+}
+
+function syncColumn(){
+    const nameStr = document.getElementById("colNames").value;
+    const nameArr = nameStr.split(/[，,]/).filter(item => item.trim() !== "");
+    document.getElementById("colCount").value = nameArr.length;
+    renderTable();
+}
+
+function syncWidthByText(){
+    const nameStr = document.getElementById("colNames").value;
+    const nameArr = nameStr.split(/[，,]/).filter(item => item.trim() !== "");
+    const widthList = nameArr.map(name => {
+        const len = name.length;
+        if(len <= 2) return 50;
+        if(len === 3) return 60;
+        if(len === 4) return 70;
+        if(len === 5) return 80;
+        return 90;
+    });
+    document.getElementById("colWidths").value = widthList.join("，");
+    renderTable();
+}
+
+function setRemarkAlign(align){
+    remarkAlign = align;
+    document.getElementById("tableRemark").style.textAlign = align;
+}
+
+function saveTableData(){
+    const table = document.querySelector(".edit-table");
+    if(!table) return;
+    const rows = table.querySelectorAll("tbody tr");
+    tableData = [];
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const rowData = [];
+        cells.forEach(cell => {
+            rowData.push(cell.innerText);
+        });
+        tableData.push(rowData);
+    });
+}
+
+function restoreTableData(){
+    const table = document.querySelector(".edit-table");
+    if(!table || tableData.length === 0) return;
+    const rows = table.querySelectorAll("tbody tr");
+    rows.forEach((row, rowIndex) => {
+        const cells = row.querySelectorAll("td");
+        cells.forEach((cell, colIndex) => {
+            if(tableData[rowIndex] && tableData[rowIndex][colIndex] !== undefined){
+                cell.innerText = tableData[rowIndex][colIndex];
+            }
+        });
+    });
+}
+
+function fillBatchContent(){
+    const content = document.getElementById("batchContent").value;
+    if(!content) return;
+    const rows = content.split("\n").filter(item => item.trim() !== "");
+    document.getElementById("rowCount").value = rows.length;
+    renderTable();
+    setTimeout(()=>{
+        const table = document.querySelector(".edit-table");
+        if(!table) return;
+        const tableRows = table.querySelectorAll("tbody tr");
+        rows.forEach((row, rowIndex) => {
+            if(!tableRows[rowIndex]) return;
+            const cells = row.split(/[，,]/);
+            const tableCells = tableRows[rowIndex].querySelectorAll("td");
+            cells.forEach((cell, colIndex) => {
+                if(tableCells[colIndex]){
+                    tableCells[colIndex].innerText = cell.trim();
+                }
+            });
+        });
+        saveTableData();
+    },50);
+}
+
+function generateTemplate(){
+    const template = {
+        leftCustomText: document.getElementById("leftCustomText").value,
+        leftTextSize: document.getElementById("leftTextSize").value,
+        titleText: document.getElementById("titleText").value,
+        titleSize: document.getElementById("titleSize").value,
+        titleAlign: document.getElementById("titleAlign").value,
+        pageDir: document.getElementById("pageDir").value,
+        colCount: document.getElementById("colCount").value,
+        rowCount: document.getElementById("rowCount").value,
+        colNames: document.getElementById("colNames").value,
+        colWidths: document.getElementById("colWidths").value,
+        remarkInput: document.getElementById("remarkInput").value,
+        remarkAlign: remarkAlign
+    };
+    document.getElementById("templateCode").value = JSON.stringify(template, null, 2);
+}
+
+function loadTemplate(){
+    const code = document.getElementById("templateCode").value;
+    if(!code) return;
+    try{
+        const template = JSON.parse(code);
+        loadObjTemplate(template);
+        renderTable();
+    }catch(e){
+        alert("模板格式錯誤，請檢查後重試");
+    }
+}
+
+function copyTemplate(){
+    const textarea = document.getElementById("templateCode");
+    textarea.select();
+    document.execCommand("copy");
+}
+
+function pasteTemplate(){
+    navigator.clipboard.readText()
+    .then(text => {
+        document.getElementById("templateCode").value = text;
+    })
+    .catch(err => {
+        alert("貼上失敗，請手動貼上");
+    });
+}
+
+function clearTemplate(){
+    document.getElementById("templateCode").value = "";
+}
+
+function renderTable(){
+    saveTableData();
+
+    const remarkText = document.getElementById("remarkInput").value;
+    const remarkDom = document.getElementById("tableRemark");
+    remarkDom.innerText = remarkText;
+    remarkDom.style.textAlign = remarkAlign;
+
+    const titleText = document.getElementById("titleText").value.trim() || "PCB/送外倉清點表單";
+    const titleSize = parseInt(document.getElementById("titleSize").value) || 20;
+    const titleAlign = document.getElementById("titleAlign").value;
+    const colCount = parseInt(document.getElementById("colCount").value) || 7;
+    const rowCount = parseInt(document.getElementById("rowCount").value) || 4;
+
+    const names = document.getElementById("colNames").value
+        .split(/[，,]/)
+        .map(v => v.trim());
+
+    const widths = document.getElementById("colWidths").value
+        .split(/[，,]/)
+        .map(v => parseInt(v.trim()) || 70);
+
+    const titleBox = document.getElementById("titleBox");
+    titleBox.innerText = titleText;
+    titleBox.style.fontSize = titleSize + "px";
+    titleBox.style.textAlign = titleAlign;
+
+    let html = "<table class='edit-table'>";
+    html += "<thead><tr>";
+
+    for(let i = 0; i < colCount; i++){
+        html += `<th style="width:${widths[i] || 70}px">${names[i] || ""}</th>`;
+    }
+
+    html += "</tr></thead><tbody>";
+
+    for(let r = 0; r < rowCount; r++){
+        html += "<tr>";
+        for(let c = 0; c < colCount; c++){
+            html += `<td contenteditable="true"></td>`;
+        }
+        html += "</tr>";
+    }
+
+    html += "</tbody></table>";
+    document.getElementById("tableBox").innerHTML = html;
+
+    restoreTableData();
+}
+
+function doPrint(){
+    const now = new Date();
+    document.getElementById("printTime").innerText = formatDateTime(now);
+
+    const dir = document.getElementById("pageDir").value;
+    document.getElementById("pageStyle").innerHTML = `@page{
+        size:A4 ${dir};
+        margin:5mm;
+        @top-left: "";
+        @top-right: "";
+        @bottom-left: "";
+        @bottom-right: "";
+    }`;
+    setTimeout(() => {
+        window.print();
+    }, 150);
+}
+
+document.getElementById("leftCustomText").addEventListener("input", applyLeftText);
+document.getElementById("leftTextSize").addEventListener("input", applyLeftText);
+
+document.addEventListener("input", function(e){
+    if(e.target.id === "remarkInput"){
+        document.getElementById("tableRemark").innerText = e.target.value;
+    }
+    if(
+        e.target.id === "titleText" ||
+        e.target.id === "titleSize" ||
+        e.target.id === "colCount" ||
+        e.target.id === "rowCount" ||
+        e.target.id === "colNames" ||
+        e.target.id === "colWidths"
+    ){
+        renderTable();
+    }
+});
+
+document.getElementById("titleAlign").addEventListener("change", renderTable);
+document.getElementById("pageDir").addEventListener("change", renderTable);
+</script>
+
+</body>
+</html>
