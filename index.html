@@ -168,27 +168,6 @@
       transform: translateY(0);
     }
 
-    .helper-bar {
-      position: absolute;
-      left: 12px;
-      bottom: 12px;
-      z-index: 5;
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 8px 10px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-      font-size: 12px;
-      color: #666;
-      max-width: min(88vw, 360px);
-      line-height: 1.5;
-      pointer-events: none;
-    }
-
-    .helper-bar strong {
-      color: var(--color-main);
-    }
-
     @media (max-width: 640px) {
       .app-logo {
         font-size: 1.35rem;
@@ -198,13 +177,6 @@
         min-width: 82px;
         padding: 0 12px;
         font-size: 12px;
-      }
-
-      .helper-bar {
-        left: 8px;
-        right: 8px;
-        bottom: 8px;
-        max-width: none;
       }
     }
   </style>
@@ -229,12 +201,6 @@
           title="工具內容"
           sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-downloads"
         ></iframe>
-
-        <div class="helper-bar">
-          <strong>新增工具方式：</strong><br>
-          只要在 <code>tools</code> 陣列多加一行，例如
-          <code>{ name: 'QA', src: 'qa.html' }</code>
-        </div>
       </div>
     </main>
   </div>
