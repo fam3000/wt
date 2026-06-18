@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PCB / 料件箱數統計系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #e6edf3;
+            padding: 12px;
+            min-height: 100vh;
+            max-width: 430px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 8px 0 12px;
+            color: #58a6ff;
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .input-panel {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .input-row input {
+            width: 100%;
+            height: 42px;
+            padding: 0 10px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-size: 15px;
+        }
+
+        .input-row input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .btn-del-row {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 26px;
+            height: 26px;
+            background: #da3633;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        .row-btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-space {
+            flex: 1;
+            height: 42px;
+            background-color: #444c56;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            flex: 2;
+            height: 42px;
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-add-row {
+            width: 100%;
+            height: 38px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .btn-batch-all {
+            width: 100%;
+            height: 40px;
+            background-color: #9333ea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .stats-panel {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+        }
+
+        .stats-title {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #58a6ff;
+            font-weight: 600;
+        }
+
+        .stat-group {
+            border-bottom: 1px dashed #444c56;
+            padding: 8px 0;
+        }
+        .stat-group:last-child {
+            border-bottom: none;
+        }
+
+        .stat-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 15px;
+            white-space: normal;
+            word-break: break-all;
+        }
+
+        .calc-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 15px;
+            white-space: normal;
+            word-break: break-all;
+        }
+
+        .calc-value {
+            color: #b89248;
+            font-weight: 600;
+        }
+
+        .trace-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #22272e;
+            white-space: normal;
+            word-break: break-all;
+        }
+        .trace-item:last-child{
+            border-bottom: none;
+        }
+
+        .trace-good {
+            color: #22c55e;
+            font-weight: 600;
+        }
+        .trace-warning {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        .trace-expired {
+            color: #f85149;
+            font-weight: 600;
+        }
+
+        .color-desc {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #22272e;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .desc-green { color: #22c55e; }
+        .desc-yellow { color: #f59e0b; }
+        .desc-red { color: #f85149; }
+
+        .bottom-clear {
+            margin-top: 8px;
+        }
+
+        .btn-clear-all {
+            width: 100%;
+            height: 44px;
+            background-color: #da3633;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-copy {
+            width: 100%;
+            height: 42px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            border: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #238636;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 999;
+        }
+        .trace-sub-title{
+            font-size:14px;
+            margin:6px 0 4px;
+            color:#94a3b8;
+        }
+
+        /* ===== 以下為追加，不改你原本樣式 ===== */
+        html {
+            height: 100%;
+            background-color: #0d1117;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100%;
+            max-width: 430px;
+        }
+
+        .container {
+            width: 100%;
+            padding-bottom: 24px;
+        }
+
+        .btn-del-row,
+        .btn-space,
+        .btn-submit,
+        .btn-add-row,
+        .btn-batch-all,
+        .btn-clear-all,
+        .btn-copy {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PCB / 料件箱數統計系統</h1>
+
+        <div class="input-panel">
+            <div id="rowsWrap">
+                <div class="input-row">
+                    <button class="btn-del-row" onclick="app.delRow(this)">×</button>
+                    <input type="text" class="stackInput" placeholder="棧號">
+                    <input type="text" class="partInput" placeholder="料號">
+                    <input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">
+                    <input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">
+                    <input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">
+                    <div class="row-btn-group">
+                        <button class="btn-space" onclick="app.insertSpace(this)">空白</button>
+                        <button class="btn-submit" onclick="app.submitData(this)">送出本筆</button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-add-row" onclick="app.addRow()">➕ 新增輸入列</button>
+            <button class="btn-batch-all" onclick="app.batchSubmitAll()">🔹 全部列一次送出</button>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stats-title">📊 整體統計結果</div>
+            <div id="mainStats"></div>
+
+            <div class="color-desc">
+                <div><span class="desc-green">● 綠色</span>：可使用（剩餘到期超過30天）</div>
+                <div><span class="desc-yellow">● 黃色</span>：即將過期（剩餘到期30天內）</div>
+                <div><span class="desc-red">● 紅色</span>：已過期</div>
+            </div>
+        </div>
+
+        <div class="bottom-clear">
+            <button class="btn-clear-all" onclick="app.clearAll()">重置</button>
+            <button class="btn-copy" onclick="app.copyResult()">複製規格化資料</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ISO標準週數日期算法
+        function getISOWeekDates(year, week) {
+            const simple = new Date(year, 0, 1 + (week - 1) * 7);
+            const dayOfWeek = simple.getDay();
+            const ISOweekStart = new Date(simple);
+            if(dayOfWeek <= 4) ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+            else ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+            return ISOweekStart;
+        }
+        function formatDate(date) {
+            return `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')}`;
+        }
+
+        const app = {
+            rowsWrap: document.getElementById('rowsWrap'),
+            mainStatsEl: document.getElementById('mainStats'),
+            toastEl: document.getElementById('toast'),
+            groupData: [], // 分組數據：以 棧號+料號 為分組key
+
+            insertSpace(btn) {
+                const row = btn.closest('.input-row');
+                const qtyInput = row.querySelector('.qtyInput');
+                const start = qtyInput.selectionStart;
+                const end = qtyInput.selectionEnd;
+                const value = qtyInput.value;
+                qtyInput.value = value.substring(0, start) + ' ' + value.substring(end);
+                qtyInput.selectionStart = qtyInput.selectionEnd = start + 1;
+                qtyInput.focus();
+            },
+
+            parseQtyList(val) {
+                const numArr = val.trim().split(/\s+/).map(n => parseInt(n) || 0).filter(n => n > 0);
+                return numArr;
+            },
+
+            addRow() {
+                const row = document.createElement('div');
+                row.className = 'input-row';
+                row.innerHTML = `
+                    <button class="btn-del-row" onclick="app.delRow(this)">×</button>
+                    <input type="text" class="stackInput" placeholder="棧號">
+                    <input type="text" class="partInput" placeholder="料號">
+                    <input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">
+                    <input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">
+                    <input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">
+                    <div class="row-btn-group">
+                        <button class="btn-space" onclick="app.insertSpace(this)">空白</button>
+                        <button class="btn-submit" onclick="app.submitData(this)">送出本筆</button>
+                    </div>
+                `;
+                this.rowsWrap.appendChild(row);
+            },
+
+            delRow(btn) {
+                const allRows = this.rowsWrap.querySelectorAll('.input-row');
+                if (allRows.length <= 1) {
+                    this.showToast('至少保留一組輸入欄位');
+                    return;
+                }
+                btn.closest('.input-row').remove();
+            },
+
+            // 單列送出
+            submitData(btn) {
+                const row = btn.closest('.input-row');
+                const stackEl = row.querySelector('.stackInput');
+                const partEl = row.querySelector('.partInput');
+                const traceEl = row.querySelector('.traceInput');
+                const qtyEl = row.querySelector('.qtyInput');
+                const boxEl = row.querySelector('.boxInput');
+
+                const stack = stackEl.value.trim();
+                const part = partEl.value.trim();
+                const trace = traceEl.value.trim();
+                const qtyList = this.parseQtyList(qtyEl.value);
+                const boxCount = parseInt(boxEl.value) || 1;
+
+                if (qtyList.length === 0) {
+                    this.showToast('請輸入有效片數');
+                    return;
+                }
+
+                // 組成分組唯一key：棧號+料號
+                const groupKey = stack + '|' + part;
+                let targetGroup = this.groupData.find(g => g.key === groupKey);
+
+                // 不存在該分組 → 新建分組
+                if (!targetGroup) {
+                    targetGroup = {
+                        key: groupKey,
+                        stack: stack,
+                        part: part,
+                        totalQty: 0,
+                        totalBox: 0,
+                        qtyBoxMap: {},
+                        traceMap: {} // 該分組專屬TRACE，不跨組合併
+                    };
+                    this.groupData.push(targetGroup);
+                }
+
+                // 塞入數據
+                if (qtyList.length === 1) {
+                    const qty = qtyList[0];
+                    for(let i=0; i < boxCount; i++){
+                        targetGroup.totalQty += qty;
+                        targetGroup.totalBox += 1;
+                        targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
+                        if(trace) targetGroup.traceMap[trace] = (targetGroup.traceMap[trace] || 0) + qty;
+                    }
+                } else {
+                    qtyList.forEach(qty => {
+                        targetGroup.totalQty += qty;
+                        targetGroup.totalBox += 1;
+                        targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
+                        if(trace) targetGroup.traceMap[trace] = (targetGroup.traceMap[trace] || 0) + qty;
+                    });
+                }
+
+                stackEl.value = '';
+                partEl.value = '';
+                traceEl.value = '';
+                qtyEl.value = '';
+                boxEl.value = '';
+                stackEl.focus();
+                this.calcAll();
+            },
+
+            // 批次送出所有列
+            batchSubmitAll() {
+                const allRows = this.rowsWrap.querySelectorAll('.input-row');
+                let hasValid = false;
+
+                allRows.forEach(row => {
+                    const stackEl = row.querySelector('.stackInput');
+                    const partEl = row.querySelector('.partInput');
+                    const traceEl = row.querySelector('.traceInput');
+                    const qtyEl = row.querySelector('.qtyInput');
+                    const boxEl = row.querySelector('.boxInput');
+
+                    const stack = stackEl.value.trim();
+                    const part = partEl.value.trim();
+                    const trace = traceEl.value.trim();
+                    const qtyList = this.parseQtyList(qtyEl.value);
+                    const boxCount = parseInt(boxEl.value) || 1;
+
+                    if (qtyList.length === 0) return;
+                    hasValid = true;
+
+                    const groupKey = stack + '|' + part;
+                    let targetGroup = this.groupData.find(g => g.key === groupKey);
+                    if (!targetGroup) {
+                        targetGroup = {
+                            key: groupKey,
+                            stack: stack,
+                            part: part,
+                            totalQty: 0,
+                            totalBox: 0,
+                            qtyBoxMap: {},
+                            traceMap: {}
+                        };
+                        this.groupData.push(targetGroup);
+                    }
+
+                    if (qtyList.length === 1) {
+                        const qty = qtyList[0];
+                        for(let i=0; i < boxCount; i++){
+                            targetGroup.totalQty += qty;
+                            targetGroup.totalBox += 1;
+                            targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
+                            if(trace) targetGroup.traceMap[trace] = (targetGroup.traceMap[trace] || 0) + qty;
+                        }
+                    } else {
+                        qtyList.forEach(qty => {
+                            targetGroup.totalQty += qty;
+                            targetGroup.totalBox += 1;
+                            targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
+                            if(trace) targetGroup.traceMap[trace] = (targetGroup.traceMap[trace] || 0) + qty;
+                        });
+                    }
+
+                    stackEl.value = '';
+                    partEl.value = '';
+                    traceEl.value = '';
+                    qtyEl.value = '';
+                    boxEl.value = '';
+                });
+
+                if (!hasValid) {
+                    this.showToast('未偵測到有效資料');
+                    return;
+                }
+                this.showToast('所有列送出成功');
+                this.calcAll();
+            },
+
+            clearAll() {
+                if (!confirm('確定要清空所有資料嗎？')) return;
+                this.groupData = [];
+                this.rowsWrap.innerHTML = `
+                    <div class="input-row">
+                        <button class="btn-del-row" onclick="app.delRow(this)">×</button>
+                        <input type="text" class="stackInput" placeholder="棧號">
+                        <input type="text" class="partInput" placeholder="料號">
+                        <input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">
+                        <input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">
+                        <input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">
+                        <div class="row-btn-group">
+                            <button class="btn-space" onclick="app.insertSpace(this)">空白</button>
+                            <button class="btn-submit" onclick="app.submitData(this)">送出本筆</button>
+                        </div>
+                    </div>
+                `;
+                this.calcAll();
+                this.showToast('已重置');
+            },
+
+            calcAll() {
+                this.renderMainStats();
+            },
+
+            // 渲染分組統計 + 該組專屬TRACE（各自分開，不會集中）
+            renderMainStats() {
+                let html = '';
+                this.groupData.forEach(group => {
+                    const calcParts = Object.entries(group.qtyBoxMap).map(([q,b])=>`${q}×${b}`).join('+');
+                    
+                    html += `
+                        <div class="stat-group">
+                            <div class="stat-line"><span>棧號</span><span>${group.stack}</span></div>
+                            <div class="stat-line"><span>料號</span><span>${group.part}</span></div>
+                            <div class="stat-line"><span>總箱數</span><span>${group.totalBox}</span></div>
+                            <div class="stat-line"><span>總片數</span><span>${group.totalQty}</span></div>
+                            <div class="calc-line">
+                                <span>計算方式</span>
+                                <span>${calcParts}=<span class="calc-value">${group.totalQty}</span></span>
+                            </div>
+                    `;
+
+                    // 該組有TRACE才顯示
+                    if(Object.keys(group.traceMap).length > 0){
+                        html += `<div class="trace-sub-title">🔍 本組 TRACE ID</div>`;
+                        Object.entries(group.traceMap).forEach(([id, qty]) => {
+                            const cls = this.getTraceColor(id);
+                            html += `
+                                <div class="trace-item">
+                                    <span class="${cls}">${id}</span>
+                                    <span>${qty} 片</span>
+                                </div>
+                            `;
+                        });
+                    }
+                    html += `</div>`;
+                });
+                this.mainStatsEl.innerHTML = html;
+            },
+
+            getTraceColor(traceId) {
+                const id = String(traceId);
+                const year = 2000 + parseInt(id.substring(0,2));
+                const week = parseInt(id.substring(2,4));
+                const productionStart = getISOWeekDates(year, week);
+                const expireStart = getISOWeekDates(year + 1, week);
+                const today = new Date();
+                const diffDay = Math.floor((expireStart - today) / (1000 * 60 * 60 * 24));
+
+                if (diffDay < 0) return 'trace-expired';
+                else if (diffDay <= 30) return 'trace-warning';
+                else return 'trace-good';
+            },
+
+            getSingleDate(traceId) {
+                const id = String(traceId);
+                const year = 2000 + parseInt(id.substring(0,2));
+                const week = parseInt(id.substring(2,4));
+                const startDate = getISOWeekDates(year, week);
+                return formatDate(startDate);
+            },
+
+            // 複製：每一分組單獨一行換行
+            copyResult() {
+                if(this.groupData.length === 0){
+                    this.showToast('尚無資料可複製');
+                    return;
+                }
+
+                let copyLines = [];
+                this.groupData.forEach(group => {
+                    const calcFormula = Object.entries(group.qtyBoxMap).map(([q,b])=>`${q}×${b}`).join('+');
+                    const traceList = Object.keys(group.traceMap);
+                    const dataCodeStr = Object.entries(group.traceMap).map(([k,v])=>`${k}*${v}`).join('/');
+
+                    let minTrace = traceList[0] || '';
+                    traceList.forEach(t=>{
+                        if(Number(t) < Number(minTrace)) minTrace = t;
+                    });
+                    const dateStr = minTrace ? this.getSingleDate(minTrace) : '';
+
+                    // 格式：棧號,料號,計算式,總片數,總箱數,TRACE數據,日期
+                    const line = `${group.stack},${group.part},${calcFormula},${group.totalQty},${group.totalBox},${dataCodeStr},${dateStr}`;
+                    copyLines.push(line);
+                });
+
+                // 多筆換行拼接
+                const resultStr = copyLines.join('\n');
+
+                navigator.clipboard.writeText(resultStr).then(()=>{
+                    this.showToast('複製成功！');
+                }).catch(()=>{
+                    const textarea = document.createElement('textarea');
+                    textarea.value = resultStr;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.showToast('複製成功！');
+                });
+            },
+
+            showToast(msg) {
+                this.toastEl.textContent = msg;
+                this.toastEl.style.display = 'block';
+                setTimeout(()=>this.toastEl.style.display='none', 1800);
+            }
+        };
+
+        document.addEventListener('keydown', e=>{
+            if(e.key==='Enter') {
+                const lastBtn = document.querySelector('.input-row:last-child .btn-submit');
+                if(lastBtn) lastBtn.click();
+            }
+        });
+
+        /* ===== 以下為追加，不改你原本邏輯 ===== */
+
+        // 讓 iframe 內頁在載入後更穩定顯示
+        window.addEventListener('load', () => {
+            document.body.style.visibility = 'visible';
+        });
+
+        // 可選：給主頁呼叫用，若之後你要在 PCB 頁內加按鈕切換別的分頁，可直接呼叫這個
+        window.goParentTab = function(tabName) {
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'SWITCH_TOOL',
+                        tab: tabName
+                    }, '*');
+                }
+            } catch (err) {}
+        };
+    </script>
+</body>
+</html>
