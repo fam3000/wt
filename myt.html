@@ -49,9 +49,6 @@ button{border:none;border-radius:999px;padding:10px 14px;cursor:pointer}
 .data-col input,.barcode-col input,.title-input{width:100%;border:none;outline:none;background:transparent;text-align:var(--field-align);font-size:14px}
 .title-input{font-size:var(--title-font-size)}
 .barcode-col svg{max-width:100%;height:32px;display:block;margin:0 auto}
-.merge-cell-wrap{display:flex;align-items:center;gap:8px;width:100%;padding:0 4px}
-.merge-cell-wrap input{flex:1}
-.merge-cell-wrap svg{flex:0 0 120px;height:30px}
 .bigBpInput{border:none !important;font-size:var(--bp-font-size) !important;font-weight:1000;text-align:center !important;width:100%;height:100%;outline:none;background:transparent;letter-spacing:1px;line-height:1;vertical-align:middle;padding:0}
 .block-toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin:0 0 6px}
 .block-toolbar button{padding:6px 10px;border-radius:999px;font-size:12px}
@@ -70,14 +67,7 @@ button{border:none;border-radius:999px;padding:10px 14px;cursor:pointer}
   .a4-page{width:100%;min-height:auto;border:none;padding:0;margin:0;box-shadow:none;page-break-inside:avoid;break-inside:avoid}
   .table-block{margin-bottom:8mm;page-break-inside:avoid;break-inside:avoid}
   .main-table,.main-table tr,.main-table td{page-break-inside:avoid!important;break-inside:avoid!important}
-  @page{
-    size:A4;
-    margin:8mm;
-  }
-  @page landscape{
-    size:A4 landscape;
-    margin:8mm;
-  }
+  @page{size:A4;margin:8mm}
 }
 </style>
 </head>
@@ -134,13 +124,13 @@ button{border:none;border-radius:999px;padding:10px 14px;cursor:pointer}
     <textarea id="batchText" placeholder="A01,180-16612-DFGF-E30,10×4+15×7+20×1,165,12,2612165,2026/03/16
 A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23"></textarea>
     <div class="row-4">
-      <button class="btn-light" id="pasteBatchBtn">貼上</button>
-      <button class="btn-light" id="copyBatchBtn">複製</button>
-      <button class="btn-light" id="clearBatchBtn">清除</button>
-      <button class="btn-light" id="demoBtn">載入範例</button>
+      <button class="btn-light" id="pasteBatchBtn" type="button">貼上</button>
+      <button class="btn-light" id="copyBatchBtn" type="button">複製</button>
+      <button class="btn-light" id="clearBatchBtn" type="button">清除</button>
+      <button class="btn-light" id="demoBtn" type="button">載入範例</button>
     </div>
     <div class="actions" style="margin-top:10px">
-      <button class="btn-primary" id="generateBtn">批量生成</button>
+      <button class="btn-primary" id="generateBtn" type="button">批量生成</button>
     </div>
 
     <h2>全域快速填寫</h2>
@@ -155,15 +145,15 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23"></textarea>
       <label><div class="small muted">BP代碼</div><input id="bulkBP" value="BP01" /></label>
     </div>
     <div class="actions-3">
-      <button class="btn-secondary" id="applyAllBtn">套用到全部</button>
-      <button class="btn-light" id="copyFirstBtn">第一張同步全部</button>
-      <button class="btn-danger" id="clearBtn">清空全部</button>
+      <button class="btn-secondary" id="applyAllBtn" type="button">套用到全部</button>
+      <button class="btn-light" id="copyFirstBtn" type="button">第一張同步全部</button>
+      <button class="btn-danger" id="clearBtn" type="button">清空全部</button>
     </div>
 
     <h2>操作</h2>
     <div class="actions">
-      <button class="btn-primary" id="printBtn">列印全部</button>
-      <button class="btn-light" id="addEmptyBtn">加一張空白麥頭</button>
+      <button class="btn-primary" id="printBtn" type="button">列印全部</button>
+      <button class="btn-light" id="addEmptyBtn" type="button">加一張空白麥頭</button>
     </div>
   </aside>
 
@@ -171,401 +161,398 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23"></textarea>
 </div>
 
 <script>
-const root = document.documentElement;
-const previewWrap = document.getElementById('previewWrap');
-const batchText = document.getElementById('batchText');
-const printOrientation = document.getElementById('printOrientation');
-const titleFontSizeInput = document.getElementById('titleFontSizeInput');
-const defaultDemo = `A01,180-16612-DFGF-E30,10×4+15×7+20×1,165,12,2612*165,2026/03/16
+document.addEventListener('DOMContentLoaded', function(){
+  const root = document.documentElement;
+  const previewWrap = document.getElementById('previewWrap');
+  const batchText = document.getElementById('batchText');
+  const printOrientation = document.getElementById('printOrientation');
+  const titleFontSizeInput = document.getElementById('titleFontSizeInput');
+  const defaultDemo = `A01,180-16612-DFGF-E30,10×4+15×7+20×1,165,12,2612*165,2026/03/16
 A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
-let alignValue = 'center';
+  let alignValue = 'center';
 
-function esc(v=''){
-  return String(v)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
-}
+  function esc(v=''){
+    return String(v)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
 
-function detectLoose(qtyStr){
-  if(!qtyStr) return 'N';
-  return qtyStr.includes('+') ? 'Y' : 'N';
-}
+  function detectLoose(qtyStr){
+    if(!qtyStr) return 'N';
+    return qtyStr.includes('+') ? 'Y' : 'N';
+  }
 
-function makeLabelHTML(data, index, totalCount){
-  const [pallet='', part='', qtyBox='', perPal='', boxNum='', skip='', dateCode=''] = data;
-  const title = document.getElementById('globalPageTitle').value.trim() || '竹北A3廠TO東明倉';
-  const autoLoose = detectLoose(qtyBox);
+  function makeLabelHTML(data, index, totalCount){
+    const row = Array.isArray(data) ? data : [];
+    const pallet = row[0] || '';
+    const part = row[1] || '';
+    const qtyBox = row[2] || '';
+    const perPal = row[3] || '';
+    const boxNum = row[4] || '';
+    const dateCode = row[6] || '';
+    const title = document.getElementById('globalPageTitle').value.trim() || '竹北A3廠TO東明倉';
+    const autoLoose = detectLoose(qtyBox);
 
-  return `
-    <section class="table-block" data-index="${index}">
-      <div class="block-toolbar">
-        <button class="btn-light duplicate-btn" type="button">複製此張</button>
-        <button class="btn-light clone-prev-btn" type="button">套用上一張內容</button>
-        <button class="btn-light delete-btn" type="button">刪除此張</button>
-      </div>
-      <div class="label-title"><input class="title-input page-title" value="${esc(title)}"></div>
-      <table class="main-table">
-        <tr>
-          <td class="label-col">出廠日期</td>
-          <td colspan="2" class="data-col"><input class="outDate syncable" value=""></td>
-        </tr>
-        <tr>
-          <td class="label-col">TICKET#</td>
-          <td class="data-col merged-mid"><input class="val0 syncable" value=""></td>
-          <td class="barcode-col merged-right"><svg class="bc0"></svg></td>
-        </tr>
-        <tr>
-          <td class="label-col">料號</td>
-          <td class="data-col merged-mid"><input class="val1 syncable" value="${esc(part.trim())}"></td>
-          <td class="barcode-col merged-right"><svg class="bc1"></svg></td>
-        </tr>
-        <tr>
-          <td class="label-col">DATE CODE</td>
-          <td class="data-col merged-mid"><input class="val2 syncable" value="${esc(dateCode.trim())}"></td>
-          <td class="barcode-col merged-right"><svg class="bc2"></svg></td>
-        </tr>
-        <tr>
-          <td class="label-col">箱數</td>
-          <td class="data-col merged-mid"><input class="val3 syncable" value="${esc(boxNum.trim())}"></td>
-          <td class="barcode-col merged-right"><svg class="bc3"></svg></td>
-        </tr>
-        <tr>
-          <td class="label-col">每板數量</td>
-          <td class="data-col merged-mid"><input class="qtyPerPal syncable" value="${esc(perPal.trim())}"></td>
-          <td class="barcode-col merged-right"><svg class="bc_qtyPerPal"></svg></td>
-        </tr>
-        <tr>
-          <td class="label-col">棧板編號</td>
-          <td class="data-col merged-mid"><input class="val4 syncable" value="${esc(pallet.trim())}"></td>
-          <td class="barcode-col merged-right"><svg class="bc4"></svg></td>
-        </tr>
-        <tr>
-          <td class="label-col">片數*箱數</td>
-          <td colspan="2" class="data-col"><input class="val5 syncable" value="${esc(qtyBox.trim())}"></td>
-        </tr>
-        <tr>
-          <td class="label-col">板材積(cm)</td>
-          <td class="data-col"><input class="volume syncable" value="未超材"></td>
-          <td class="barcode-col"><input class="topNote syncable" value="TO LOC"></td>
-        </tr>
-        <tr>
-          <td class="label-col">毛重(kg)</td>
-          <td class="data-col"><input class="weight syncable" value="未超重"></td>
-          <td class="barcode-col" rowspan="3"><input class="bigBpInput bpCode syncable" value="BP01"></td>
-        </tr>
-        <tr>
-          <td class="label-col">是否零散</td>
-          <td class="data-col"><input class="loose syncable" value="${autoLoose}"></td>
-        </tr>
-        <tr>
-          <td class="label-col">移轉單總板數</td>
-          <td class="data-col"><input class="totalCount syncable" value="${totalCount}"></td>
-        </tr>
-      </table>
-    </section>
-  `;
-}
+    return `
+      <section class="table-block" data-index="${index}">
+        <div class="block-toolbar">
+          <button class="btn-light duplicate-btn" type="button">複製此張</button>
+          <button class="btn-light clone-prev-btn" type="button">套用上一張內容</button>
+          <button class="btn-light delete-btn" type="button">刪除此張</button>
+        </div>
+        <div class="label-title"><input class="title-input page-title" value="${esc(title)}"></div>
+        <table class="main-table">
+          <tr>
+            <td class="label-col">出廠日期</td>
+            <td colspan="2" class="data-col"><input class="outDate syncable" value=""></td>
+          </tr>
+          <tr>
+            <td class="label-col">TICKET#</td>
+            <td class="data-col merged-mid"><input class="val0 syncable" value=""></td>
+            <td class="barcode-col merged-right"><svg class="bc0"></svg></td>
+          </tr>
+          <tr>
+            <td class="label-col">料號</td>
+            <td class="data-col merged-mid"><input class="val1 syncable" value="${esc(part.trim())}"></td>
+            <td class="barcode-col merged-right"><svg class="bc1"></svg></td>
+          </tr>
+          <tr>
+            <td class="label-col">DATE CODE</td>
+            <td class="data-col merged-mid"><input class="val2 syncable" value="${esc(dateCode.trim())}"></td>
+            <td class="barcode-col merged-right"><svg class="bc2"></svg></td>
+          </tr>
+          <tr>
+            <td class="label-col">箱數</td>
+            <td class="data-col merged-mid"><input class="val3 syncable" value="${esc(boxNum.trim())}"></td>
+            <td class="barcode-col merged-right"><svg class="bc3"></svg></td>
+          </tr>
+          <tr>
+            <td class="label-col">每板數量</td>
+            <td class="data-col merged-mid"><input class="qtyPerPal syncable" value="${esc(perPal.trim())}"></td>
+            <td class="barcode-col merged-right"><svg class="bc_qtyPerPal"></svg></td>
+          </tr>
+          <tr>
+            <td class="label-col">棧板編號</td>
+            <td class="data-col merged-mid"><input class="val4 syncable" value="${esc(pallet.trim())}"></td>
+            <td class="barcode-col merged-right"><svg class="bc4"></svg></td>
+          </tr>
+          <tr>
+            <td class="label-col">片數*箱數</td>
+            <td colspan="2" class="data-col"><input class="val5 syncable" value="${esc(qtyBox.trim())}"></td>
+          </tr>
+          <tr>
+            <td class="label-col">板材積(cm)</td>
+            <td class="data-col"><input class="volume syncable" value="未超材"></td>
+            <td class="barcode-col"><input class="topNote syncable" value="TO LOC"></td>
+          </tr>
+          <tr>
+            <td class="label-col">毛重(kg)</td>
+            <td class="data-col"><input class="weight syncable" value="未超重"></td>
+            <td class="barcode-col" rowspan="3"><input class="bigBpInput bpCode syncable" value="BP01"></td>
+          </tr>
+          <tr>
+            <td class="label-col">是否零散</td>
+            <td class="data-col"><input class="loose syncable" value="${autoLoose}"></td>
+          </tr>
+          <tr>
+            <td class="label-col">移轉單總板數</td>
+            <td class="data-col"><input class="totalCount syncable" value="${totalCount}"></td>
+          </tr>
+        </table>
+      </section>
+    `;
+  }
 
-function renderBarcode(inputEl, svgEl){
-  if(!inputEl || !svgEl) return;
-  const text = inputEl.value.trim();
-  svgEl.innerHTML = '';
-  if(!text) return;
-  try{
-    JsBarcode(svgEl, text, {
-      format:'CODE128',
-      width:2,
-      height:30,
-      displayValue:false,
-      margin:0,
-      lineColor:'#000',
-      background:'#fff'
+  function renderBarcode(inputEl, svgEl){
+    if(!inputEl || !svgEl) return;
+    const text = inputEl.value.trim();
+    svgEl.innerHTML = '';
+    if(!text) return;
+    if(typeof JsBarcode !== 'function') return;
+    try{
+      JsBarcode(svgEl, text, {format:'CODE128', width:2, height:30, displayValue:false, margin:0, lineColor:'#000', background:'#fff'});
+    }catch(err){
+      console.warn('barcode error', err);
+    }
+  }
+
+  function bindBlock(block){
+    const pairs = [
+      ['.val0','.bc0'],
+      ['.val1','.bc1'],
+      ['.val2','.bc2'],
+      ['.val3','.bc3'],
+      ['.val4','.bc4'],
+      ['.qtyPerPal','.bc_qtyPerPal']
+    ];
+
+    pairs.forEach(function(pair){
+      const input = block.querySelector(pair[0]);
+      const svg = block.querySelector(pair[1]);
+      if(!input || !svg) return;
+      renderBarcode(input, svg);
+      input.addEventListener('input', function(){ renderBarcode(input, svg); });
     });
-  }catch(err){
-    console.warn('barcode error', err);
-  }
-}
 
-function bindBlock(block){
-  const pairs = [
-    ['.val0','.bc0'],
-    ['.val1','.bc1'],
-    ['.val2','.bc2'],
-    ['.val3','.bc3'],
-    ['.val4','.bc4'],
-    ['.qtyPerPal','.bc_qtyPerPal']
-  ];
+    block.querySelectorAll('input').forEach(function(inp){ inp.style.textAlign = alignValue; });
 
-  pairs.forEach(([inputSel,svgSel])=>{
-    const input = block.querySelector(inputSel);
-    const svg = block.querySelector(svgSel);
-    if(!input || !svg) return;
-    renderBarcode(input, svg);
-    input.addEventListener('input',()=>renderBarcode(input, svg));
-  });
+    const bp = block.querySelector('.bigBpInput');
+    if(bp){ bp.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--bp-font-size'); }
 
-  block.querySelectorAll('input').forEach(inp=>inp.style.textAlign = alignValue);
+    const duplicateBtn = block.querySelector('.duplicate-btn');
+    const clonePrevBtn = block.querySelector('.clone-prev-btn');
+    const deleteBtn = block.querySelector('.delete-btn');
+    const qtyInput = block.querySelector('.val5');
 
-  const bp = block.querySelector('.bigBpInput');
-  if(bp){
-    bp.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--bp-font-size');
+    if(duplicateBtn) duplicateBtn.addEventListener('click', function(){ duplicateBlock(block); });
+    if(clonePrevBtn) clonePrevBtn.addEventListener('click', function(){ clonePrevious(block); });
+    if(deleteBtn) deleteBtn.addEventListener('click', function(){ deleteBlock(block); });
+    if(qtyInput){
+      qtyInput.addEventListener('input', function(){
+        const looseInput = block.querySelector('.loose');
+        if(looseInput) looseInput.value = detectLoose(qtyInput.value);
+      });
+    }
   }
 
-  block.querySelector('.duplicate-btn').addEventListener('click',()=>duplicateBlock(block));
-  block.querySelector('.clone-prev-btn').addEventListener('click',()=>clonePrevious(block));
-  block.querySelector('.delete-btn').addEventListener('click',()=>deleteBlock(block));
-
-  const qtyInput = block.querySelector('.val5');
-  if(qtyInput){
-    qtyInput.addEventListener('input',()=>{
-      const looseInput = block.querySelector('.loose');
-      if(looseInput) looseInput.value = detectLoose(qtyInput.value);
-    });
+  function refreshTotals(){
+    const total = previewWrap.querySelectorAll('.table-block').length;
+    previewWrap.querySelectorAll('.totalCount').forEach(function(el){ el.value = total; });
   }
-}
 
-function paginateBlocks(){
-  const blocks = [...previewWrap.querySelectorAll('.table-block')];
-  const perPage = Number(document.getElementById('perPageCount').value) || 2;
-  if(!blocks.length){
+  function paginateBlocks(){
+    const blocks = Array.from(previewWrap.querySelectorAll('.table-block'));
+    const perPage = Number(document.getElementById('perPageCount').value) || 2;
+    if(!blocks.length){
+      previewWrap.innerHTML = '';
+      return;
+    }
+    const pages = [];
+    for(let i=0; i<blocks.length; i+=perPage){
+      pages.push(blocks.slice(i, i + perPage));
+    }
     previewWrap.innerHTML = '';
-    return;
-  }
-  const pages = [];
-  for(let i=0;i<blocks.length;i+=perPage){
-    pages.push(blocks.slice(i, i+perPage));
-  }
-  previewWrap.innerHTML = '';
-  pages.forEach(group=>{
-    const page = document.createElement('section');
-    page.className = 'a4-page';
-    group.forEach(block=>page.appendChild(block));
-    previewWrap.appendChild(page);
-  });
-  refreshTotals();
-}
-
-function refreshTotals(){
-  const total = previewWrap.querySelectorAll('.table-block').length;
-  previewWrap.querySelectorAll('.totalCount').forEach(el=>el.value = total);
-}
-
-function buildFromLines(lines){
-  const validRows = [];
-  for(let line of lines){
-    let trimLine = line.trim();
-    if(!trimLine) continue;
-    trimLine = trimLine.replace(/^,+/,'').replace(/,+$/,'');
-    const cols = trimLine.split(',').map(v=>v.trim());
-    while(cols.length < 7) cols.push('');
-    validRows.push(cols);
+    pages.forEach(function(group){
+      const page = document.createElement('section');
+      page.className = 'a4-page';
+      group.forEach(function(block){ page.appendChild(block); });
+      previewWrap.appendChild(page);
+    });
+    refreshTotals();
   }
 
-  const total = validRows.length;
-  const blocks = validRows.map((row, index)=>{
+  function buildFromLines(lines){
+    const validRows = [];
+    lines.forEach(function(line){
+      let trimLine = String(line || '').trim();
+      if(!trimLine) return;
+      trimLine = trimLine.replace(/^,+/,'').replace(/,+$/,'');
+      const cols = trimLine.split(',').map(function(v){ return v.trim(); });
+      while(cols.length < 7) cols.push('');
+      validRows.push(cols);
+    });
+
+    const total = validRows.length;
+    const blocks = validRows.map(function(row, index){
+      const holder = document.createElement('div');
+      holder.innerHTML = makeLabelHTML(row, index, total);
+      return holder.firstElementChild;
+    });
+
+    previewWrap.innerHTML = '';
+    const firstPage = document.createElement('section');
+    firstPage.className = 'a4-page';
+    blocks.forEach(function(block){
+      firstPage.appendChild(block);
+      bindBlock(block);
+    });
+    previewWrap.appendChild(firstPage);
+    paginateBlocks();
+  }
+
+  function collectFieldMap(block){
+    return {
+      pageTitle: block.querySelector('.page-title')?.value || '',
+      outDate: block.querySelector('.outDate')?.value || '',
+      val0: block.querySelector('.val0')?.value || '',
+      val1: block.querySelector('.val1')?.value || '',
+      val2: block.querySelector('.val2')?.value || '',
+      val3: block.querySelector('.val3')?.value || '',
+      qtyPerPal: block.querySelector('.qtyPerPal')?.value || '',
+      val4: block.querySelector('.val4')?.value || '',
+      val5: block.querySelector('.val5')?.value || '',
+      volume: block.querySelector('.volume')?.value || '',
+      topNote: block.querySelector('.topNote')?.value || '',
+      weight: block.querySelector('.weight')?.value || '',
+      loose: block.querySelector('.loose')?.value || '',
+      bpCode: block.querySelector('.bpCode')?.value || ''
+    };
+  }
+
+  function applyFieldMap(block, map){
+    Object.keys(map).forEach(function(key){
+      const el = block.querySelector('.' + key) || block.querySelector('#' + key);
+      if(el) el.value = map[key];
+    });
+
+    [
+      ['.val0','.bc0'],
+      ['.val1','.bc1'],
+      ['.val2','.bc2'],
+      ['.val3','.bc3'],
+      ['.val4','.bc4'],
+      ['.qtyPerPal','.bc_qtyPerPal']
+    ].forEach(function(pair){
+      const input = block.querySelector(pair[0]);
+      const svg = block.querySelector(pair[1]);
+      if(input && svg) renderBarcode(input, svg);
+    });
+  }
+
+  function duplicateBlock(block){
+    const map = collectFieldMap(block);
     const holder = document.createElement('div');
-    holder.innerHTML = makeLabelHTML(row, index, total);
-    return holder.firstElementChild;
+    holder.innerHTML = makeLabelHTML(['','','','','','',''], 0, 0);
+    const newBlock = holder.firstElementChild;
+    block.after(newBlock);
+    bindBlock(newBlock);
+    applyFieldMap(newBlock, map);
+    paginateBlocks();
+  }
+
+  function clonePrevious(block){
+    const prev = block.previousElementSibling && block.previousElementSibling.classList.contains('table-block') ? block.previousElementSibling : null;
+    if(!prev){
+      alert('這一張前面沒有上一張可套用');
+      return;
+    }
+    applyFieldMap(block, collectFieldMap(prev));
+  }
+
+  function deleteBlock(block){
+    if(previewWrap.querySelectorAll('.table-block').length <= 1){
+      alert('至少保留一張');
+      return;
+    }
+    block.remove();
+    paginateBlocks();
+  }
+
+  function applyGlobalFields(){
+    const fields = {
+      val0: document.getElementById('bulkTicket').value,
+      outDate: document.getElementById('bulkOutDate').value,
+      volume: document.getElementById('bulkVolume').value,
+      weight: document.getElementById('bulkWeight').value,
+      topNote: document.getElementById('bulkTopNote').value,
+      bpCode: document.getElementById('bulkBP').value,
+      pageTitle: document.getElementById('globalPageTitle').value
+    };
+
+    previewWrap.querySelectorAll('.table-block').forEach(function(block){
+      if(block.querySelector('.val0')) block.querySelector('.val0').value = fields.val0;
+      if(block.querySelector('.outDate')) block.querySelector('.outDate').value = fields.outDate;
+      if(block.querySelector('.volume')) block.querySelector('.volume').value = fields.volume;
+      if(block.querySelector('.weight')) block.querySelector('.weight').value = fields.weight;
+      if(block.querySelector('.topNote')) block.querySelector('.topNote').value = fields.topNote;
+      if(block.querySelector('.bpCode')) block.querySelector('.bpCode').value = fields.bpCode;
+      if(block.querySelector('.page-title')) block.querySelector('.page-title').value = fields.pageTitle;
+      renderBarcode(block.querySelector('.val0'), block.querySelector('.bc0'));
+    });
+  }
+
+  function syncFirstToAll(){
+    const first = previewWrap.querySelector('.table-block');
+    if(!first) return;
+    const map = collectFieldMap(first);
+    previewWrap.querySelectorAll('.table-block').forEach(function(block, idx){
+      if(idx !== 0) applyFieldMap(block, map);
+    });
+  }
+
+  document.getElementById('pasteBatchBtn').addEventListener('click', async function(){
+    try{
+      const text = await navigator.clipboard.readText();
+      batchText.value = text;
+    }catch(e){
+      alert('無法讀取剪貼簿，請手動貼上');
+    }
   });
 
-  previewWrap.innerHTML = '';
-  const page = document.createElement('section');
-  page.className = 'a4-page';
-  blocks.forEach(block=>{
-    page.appendChild(block);
+  document.getElementById('copyBatchBtn').addEventListener('click', async function(){
+    try{
+      await navigator.clipboard.writeText(batchText.value);
+      alert('已複製批量資料');
+    }catch(e){
+      alert('複製失敗');
+    }
+  });
+
+  document.getElementById('clearBatchBtn').addEventListener('click', function(){ batchText.value = ''; });
+
+  document.getElementById('fontSizeInput').addEventListener('input', function(e){
+    const size = Number(e.target.value) || 80;
+    root.style.setProperty('--bp-font-size', size + 'px');
+    document.querySelectorAll('.bigBpInput').forEach(function(el){ el.style.fontSize = size + 'px'; });
+  });
+
+  titleFontSizeInput.addEventListener('input', function(e){
+    const size = Number(e.target.value) || 18;
+    root.style.setProperty('--title-font-size', size + 'px');
+    document.querySelectorAll('.title-input').forEach(function(el){ el.style.fontSize = size + 'px'; });
+  });
+
+  document.getElementById('globalAlign').addEventListener('change', function(e){
+    alignValue = e.target.value;
+    root.style.setProperty('--field-align', alignValue);
+    previewWrap.querySelectorAll('.table-block input').forEach(function(inp){ inp.style.textAlign = alignValue; });
+  });
+
+  document.getElementById('generateBtn').addEventListener('click', function(){
+    const lines = batchText.value.trim().split('\n');
+    if(!lines.filter(function(l){ return l.trim(); }).length){
+      alert('請先輸入批量資料');
+      return;
+    }
+    buildFromLines(lines);
+    applyGlobalFields();
+  });
+
+  document.getElementById('demoBtn').addEventListener('click', function(){ batchText.value = defaultDemo; });
+  document.getElementById('applyAllBtn').addEventListener('click', applyGlobalFields);
+  document.getElementById('copyFirstBtn').addEventListener('click', syncFirstToAll);
+  document.getElementById('clearBtn').addEventListener('click', function(){ if(confirm('確定清空畫面與資料？')) previewWrap.innerHTML = ''; });
+  document.getElementById('perPageCount').addEventListener('change', paginateBlocks);
+
+  document.getElementById('addEmptyBtn').addEventListener('click', function(){
+    const holder = document.createElement('div');
+    holder.innerHTML = makeLabelHTML(['','','','','','',''], 0, 0);
+    const block = holder.firstElementChild;
+    if(!previewWrap.querySelector('.a4-page')){
+      const page = document.createElement('section');
+      page.className = 'a4-page';
+      previewWrap.appendChild(page);
+    }
+    previewWrap.querySelector('.a4-page').appendChild(block);
     bindBlock(block);
-  });
-  previewWrap.appendChild(page);
-  paginateBlocks();
-}
-
-function collectFieldMap(block){
-  return {
-    pageTitle: block.querySelector('.page-title').value,
-    outDate: block.querySelector('.outDate').value,
-    val0: block.querySelector('.val0').value,
-    val1: block.querySelector('.val1').value,
-    val2: block.querySelector('.val2').value,
-    val3: block.querySelector('.val3').value,
-    qtyPerPal: block.querySelector('.qtyPerPal').value,
-    val4: block.querySelector('.val4').value,
-    val5: block.querySelector('.val5').value,
-    volume: block.querySelector('.volume').value,
-    topNote: block.querySelector('.topNote').value,
-    weight: block.querySelector('.weight').value,
-    loose: block.querySelector('.loose').value,
-    bpCode: block.querySelector('.bpCode').value
-  };
-}
-
-function applyFieldMap(block, map){
-  Object.entries(map).forEach(([key,val])=>{
-    const el = block.querySelector('.' + key) || block.querySelector('#' + key);
-    if(el) el.value = val;
+    applyGlobalFields();
+    paginateBlocks();
   });
 
-  const barcodePairs = [
-    ['.val0','.bc0'],
-    ['.val1','.bc1'],
-    ['.val2','.bc2'],
-    ['.val3','.bc3'],
-    ['.val4','.bc4'],
-    ['.qtyPerPal','.bc_qtyPerPal']
-  ];
-
-  barcodePairs.forEach(([inputSel, svgSel])=>{
-    const input = block.querySelector(inputSel);
-    const svg = block.querySelector(svgSel);
-    if(input && svg) renderBarcode(input, svg);
+  document.getElementById('printBtn').addEventListener('click', function(){
+    const oldStyle = document.getElementById('dynamicPrintStyle');
+    if(oldStyle) oldStyle.remove();
+    const style = document.createElement('style');
+    style.id = 'dynamicPrintStyle';
+    style.textContent = printOrientation.value === 'landscape'
+      ? '@media print{@page{size:A4 landscape;margin:8mm}}'
+      : '@media print{@page{size:A4 portrait;margin:8mm}}';
+    document.head.appendChild(style);
+    window.print();
   });
-}
-
-function duplicateBlock(block){
-  const map = collectFieldMap(block);
-  const holder = document.createElement('div');
-  holder.innerHTML = makeLabelHTML(['','','','','','',''], 0, 0);
-  const newBlock = holder.firstElementChild;
-  block.after(newBlock);
-  bindBlock(newBlock);
-  applyFieldMap(newBlock, map);
-  paginateBlocks();
-}
-
-function clonePrevious(block){
-  const prev = block.previousElementSibling?.classList.contains('table-block') ? block.previousElementSibling : null;
-  if(!prev){
-    alert('這一張前面沒有上一張可套用');
-    return;
-  }
-  applyFieldMap(block, collectFieldMap(prev));
-}
-
-function deleteBlock(block){
-  if(previewWrap.querySelectorAll('.table-block').length <= 1){
-    alert('至少保留一張');
-    return;
-  }
-  block.remove();
-  paginateBlocks();
-}
-
-function applyGlobalFields(){
-  const fields = {
-    val0: document.getElementById('bulkTicket').value,
-    outDate: document.getElementById('bulkOutDate').value,
-    volume: document.getElementById('bulkVolume').value,
-    weight: document.getElementById('bulkWeight').value,
-    topNote: document.getElementById('bulkTopNote').value,
-    bpCode: document.getElementById('bulkBP').value,
-    pageTitle: document.getElementById('globalPageTitle').value
-  };
-
-  previewWrap.querySelectorAll('.table-block').forEach(block=>{
-    block.querySelector('.val0').value = fields.val0;
-    block.querySelector('.outDate').value = fields.outDate;
-    block.querySelector('.volume').value = fields.volume;
-    block.querySelector('.weight').value = fields.weight;
-    block.querySelector('.topNote').value = fields.topNote;
-    block.querySelector('.bpCode').value = fields.bpCode;
-    block.querySelector('.page-title').value = fields.pageTitle;
-    renderBarcode(block.querySelector('.val0'), block.querySelector('.bc0'));
-  });
-}
-
-function syncFirstToAll(){
-  const first = previewWrap.querySelector('.table-block');
-  if(!first) return;
-  const map = collectFieldMap(first);
-  previewWrap.querySelectorAll('.table-block').forEach((block, idx)=>{
-    if(idx !== 0) applyFieldMap(block, map);
-  });
-}
-
-document.getElementById('pasteBatchBtn').addEventListener('click', async ()=>{
-  try{
-    const text = await navigator.clipboard.readText();
-    batchText.value = text;
-  }catch(e){
-    alert('無法讀取剪貼簿，請手動貼上');
-  }
-});
-
-document.getElementById('copyBatchBtn').addEventListener('click', async ()=>{
-  try{
-    await navigator.clipboard.writeText(batchText.value);
-    alert('已複製批量資料');
-  }catch(e){
-    alert('複製失敗');
-  }
-});
-
-document.getElementById('clearBatchBtn').addEventListener('click', ()=>{
-  batchText.value = '';
-});
-
-document.getElementById('fontSizeInput').addEventListener('input', e=>{
-  const size = Number(e.target.value) || 80;
-  root.style.setProperty('--bp-font-size', size + 'px');
-  document.querySelectorAll('.bigBpInput').forEach(el=>el.style.fontSize = size + 'px');
-});
-
-titleFontSizeInput.addEventListener('input', e=>{
-  const size = Number(e.target.value) || 18;
-  root.style.setProperty('--title-font-size', size + 'px');
-  document.querySelectorAll('.title-input').forEach(el=>el.style.fontSize = size + 'px');
-});
-
-document.getElementById('globalAlign').addEventListener('change', e=>{
-  alignValue = e.target.value;
-  root.style.setProperty('--field-align', alignValue);
-  previewWrap.querySelectorAll('.table-block input').forEach(inp=>inp.style.textAlign = alignValue);
-});
-
-document.getElementById('generateBtn').addEventListener('click', ()=>{
-  const lines = batchText.value.trim().split('\n');
-  if(!lines.filter(l=>l.trim()).length){
-    alert('請先輸入批量資料');
-    return;
-  }
-  buildFromLines(lines);
-  applyGlobalFields();
-});
-
-document.getElementById('demoBtn').addEventListener('click', ()=>{
-  batchText.value = defaultDemo;
-});
-
-document.getElementById('applyAllBtn').addEventListener('click', applyGlobalFields);
-document.getElementById('copyFirstBtn').addEventListener('click', syncFirstToAll);
-
-document.getElementById('clearBtn').addEventListener('click', ()=>{
-  if(confirm('確定清空畫面與資料？')) previewWrap.innerHTML = '';
-});
-
-document.getElementById('perPageCount').addEventListener('change', paginateBlocks);
-
-document.getElementById('addEmptyBtn').addEventListener('click', ()=>{
-  const holder = document.createElement('div');
-  holder.innerHTML = makeLabelHTML(['','','','','','',''], 0, 0);
-  const block = holder.firstElementChild;
-
-  if(!previewWrap.querySelector('.a4-page')){
-    const page = document.createElement('section');
-    page.className = 'a4-page';
-    previewWrap.appendChild(page);
-  }
-
-  previewWrap.querySelector('.a4-page').appendChild(block);
-  bindBlock(block);
-  applyGlobalFields();
-  paginateBlocks();
-});
-
-document.getElementById('printBtn').addEventListener('click', ()=>{
-  window.print();
 });
 </script>
 </body>
