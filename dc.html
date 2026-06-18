@@ -1,4 +1,3 @@
-連結
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -6,143 +5,171 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TRACE ID 週期查詢</title>
 <style>
-body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
-.box { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
-.item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-h3 { margin: 0 0 10px 0; font-size: 16px; }
-input { width: 100%; padding: 10px; box-sizing: border-box; margin-bottom: 10px; }
-button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; cursor: pointer; }
-.result { margin-top: 15px; padding: 10px; border-radius: 4px; line-height: 1.6; }
-.safe { background: #e8f5e9; color: #2e7d32; }
-.warning { background: #fff3e0; color: #ef6c00; }
-.expired { background: #ffebee; color: #c62828; }
+body{font-family:sans-serif;background:#f0f0f0;padding:20px}
+.box{max-width:400px;margin:0 auto;background:white;padding:20px;border-radius:8px}
+.item{margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #eee}
+h3{margin:0 0 10px 0;font-size:16px}
+input{width:100%;padding:10px;box-sizing:border-box;margin-bottom:10px}
+button{width:100%;padding:10px;background:#4CAF50;color:white;border:none;cursor:pointer}
+.result{margin-top:15px;padding:10px;border-radius:4px;line-height:1.6}
+.safe{background:#e8f5e9;color:#2e7d32}
+.warning{background:#fff3e0;color:#ef6c00}
+.expired{background:#ffebee;color:#c62828}
 </style>
 </head>
 <body>
 <div class="box">
     <h2>TRACE ID 雙向查詢</h2>
 
-    <!-- 正向查詢：輸入4碼 -->
     <div class="item">
         <h3>正向查詢 (4碼 → 日期)</h3>
         <input id="traceInput" maxlength="4" placeholder="輸入4碼，例如2520">
-        <button onclick="checkTrace()">查詢</button>
+        <button id="traceBtn" type="button">查詢</button>
     </div>
 
-    <!-- 反向查詢：輸入年月日 -->
     <div class="item">
         <h3>反向查詢 (日期 → 4碼)</h3>
         <input id="dateInput" placeholder="輸入日期，格式:2026/05/11">
-        <button onclick="checkDate()">查詢對應TRACE ID</button>
+        <button id="dateBtn" type="button">查詢對應TRACE ID</button>
     </div>
 
     <div id="result"></div>
 </div>
 
 <script>
-// 根據年份、週數取得週區間
-function getISOWeekDates(year, week) {
+document.addEventListener('DOMContentLoaded', function(){
+  const result = document.getElementById('result');
+  const traceInput = document.getElementById('traceInput');
+  const dateInput = document.getElementById('dateInput');
+
+  function getISOWeekDates(year, week){
     const simple = new Date(year, 0, 1 + (week - 1) * 7);
     const dayOfWeek = simple.getDay();
     const ISOweekStart = new Date(simple);
-    if(dayOfWeek <= 4) ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
-    else ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+    if(dayOfWeek <= 4){
+      ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+    }else{
+      ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+    }
     const ISOweekEnd = new Date(ISOweekStart);
     ISOweekEnd.setDate(ISOweekStart.getDate() + 6);
     return { start: ISOweekStart, end: ISOweekEnd };
-}
+  }
 
-// 日期格式化
-function formatDate(date) {
-    return ${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')};
-}
+  function formatDate(date){
+    return `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')}`;
+  }
 
-// 計算指定日期屬於當年第幾週 (ISO規範)
-function getWeekNumber(d) {
+  function getWeekNumber(d){
     const date = new Date(d);
     date.setHours(0, 0, 0, 0);
     date.setDate(date.getDate() + 4 - (date.getDay() || 7));
     const yearStart = new Date(date.getFullYear(), 0, 1);
-    const weekNo = Math.ceil(( ( (date - yearStart) / 86400000) + 1) / 7);
+    const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
     return {
-        year: date.getFullYear(),
-        week: weekNo
+      year: date.getFullYear(),
+      week: weekNo
     };
-}
+  }
 
-// 正向查詢：4碼查日期與狀態
-function checkTrace() {
-    const input = document.getElementById("traceInput").value.trim();
-    const result = document.getElementById("result");
-    if(input.length !== 4 || isNaN(input)) {
-        result.innerHTML = <div class="result expired">請輸入正確4碼，例如：2520</div>;
-        return;
+  function getStatusHTML(diffDays){
+    let statusClass = '';
+    let statusText = '';
+    if(diffDays < 0){
+      statusClass = 'expired';
+      statusText = '❌ 已過期';
+    }else if(diffDays <= 30){
+      statusClass = 'warning';
+      statusText = '⚠️ 即將過期';
+    }else{
+      statusClass = 'safe';
+      statusText = '✅ 可使用';
     }
-    const year = 2000 + parseInt(input.substring(0,2));
-    const week = parseInt(input.substring(2,4));
+    const remainText = diffDays < 0 ? `已超過 ${Math.abs(diffDays)} 天` : `剩餘 ${diffDays} 天`;
+    return { statusClass, statusText, remainText };
+  }
+
+  function checkTrace(){
+    const input = traceInput.value.trim();
+    if(input.length !== 4 || isNaN(input)){
+      result.innerHTML = '<div class="result expired">請輸入正確4碼，例如：2520</div>';
+      return;
+    }
+
+    const year = 2000 + parseInt(input.substring(0,2), 10);
+    const week = parseInt(input.substring(2,4), 10);
+    if(week < 1 || week > 53){
+      result.innerHTML = '<div class="result expired">週數需介於 01 到 53</div>';
+      return;
+    }
+
     const production = getISOWeekDates(year, week);
     const expire = getISOWeekDates(year + 1, week);
     const today = new Date();
     const diffDays = Math.floor((expire.end - today) / (1000 * 60 * 60 * 24));
-    let statusClass, statusText;
+    const status = getStatusHTML(diffDays);
 
-    if(diffDays < 0) {
-        statusClass = "expired";
-        statusText = "❌ 已過期";
-    } else if(diffDays <= 30) {
-        statusClass = "warning";
-        statusText = "⚠️ 即將過期";
-    } else {
-        statusClass = "safe";
-        statusText = "✅ 可使用";
-    }
+    result.innerHTML = `
+      <div class="result ${status.statusClass}">
+        <strong>${status.statusText}</strong><br>
+        TRACE ID：${input}<br>
+        生產區間：${formatDate(production.start)} ~ ${formatDate(production.end)}<br>
+        到期區間：${formatDate(expire.start)} ~ ${formatDate(expire.end)}<br>
+        距離到期：${status.remainText}
+      </div>
+    `;
+  }
 
-    result.innerHTML =         <div class="result ${statusClass}">             <strong>${statusText}</strong><br>             TRACE ID：${input}<br>             生產區間：${formatDate(production.start)} ~ ${formatDate(production.end)}<br>             到期區間：${formatDate(expire.start)} ~ ${formatDate(expire.end)}<br>             距離到期：${diffDays < 0 ?已超過 ${Math.abs(diffDays)} 天` : `剩餘 ${diffDays} 天}         </div>     ;
-}
-
-// 反向查詢：日期查對應4碼
-function checkDate() {
-    const input = document.getElementById("dateInput").value.trim();
-    const result = document.getElementById("result");
-    // 格式驗證 2026/05/11 或 2026-05-11
+  function checkDate(){
+    const input = dateInput.value.trim();
     const dateReg = /^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/;
-    if(!dateReg.test(input)) {
-        result.innerHTML = <div class="result expired">日期格式錯誤，請使用範例格式：2026/05/11</div>;
-        return;
+    if(!dateReg.test(input)){
+      result.innerHTML = '<div class="result expired">日期格式錯誤，請使用範例格式：2026/05/11</div>';
+      return;
     }
 
-    const targetDate = new Date(input);
-    if(isNaN(targetDate.getTime())) {
-        result.innerHTML = <div class="result expired">無效日期，請重新輸入</div>;
-        return;
+    const normalized = input.replace(/-/g, '/');
+    const targetDate = new Date(normalized);
+    if(isNaN(targetDate.getTime())){
+      result.innerHTML = '<div class="result expired">無效日期，請重新輸入</div>';
+      return;
     }
 
-    // 取得日期對應年份、週數
     const weekInfo = getWeekNumber(targetDate);
     const yearCode = String(weekInfo.year).slice(-2);
     const weekCode = String(weekInfo.week).padStart(2, '0');
     const traceId = yearCode + weekCode;
 
-    // 補充該週完整區間 & 有效期
     const production = getISOWeekDates(weekInfo.year, weekInfo.week);
     const expire = getISOWeekDates(weekInfo.year + 1, weekInfo.week);
     const today = new Date();
     const diffDays = Math.floor((expire.end - today) / (1000 * 60 * 60 * 24));
-    let statusClass, statusText;
+    const status = getStatusHTML(diffDays);
 
-    if(diffDays < 0) {
-        statusClass = "expired";
-        statusText = "❌ 已過期";
-    } else if(diffDays <= 30) {
-        statusClass = "warning";
-        statusText = "⚠️ 即將過期";
-    } else {
-        statusClass = "safe";
-        statusText = "✅ 可使用";
-    }
+    result.innerHTML = `
+      <div class="result ${status.statusClass}">
+        <strong>${status.statusText}</strong><br>
+        輸入日期：${formatDate(targetDate)}<br>
+        對應年份：${weekInfo.year} 年<br>
+        所屬週數：第 ${weekInfo.week} 週<br>
+        對應TRACE ID：${traceId}<br>
+        本週區間：${formatDate(production.start)} ~ ${formatDate(production.end)}<br>
+        到期區間：${formatDate(expire.start)} ~ ${formatDate(expire.end)}<br>
+        距離到期：${status.remainText}
+      </div>
+    `;
+  }
 
-    result.innerHTML =         <div class="result ${statusClass}">             <strong>${statusText}</strong><br>             輸入日期：${formatDate(targetDate)}<br>             對應年份：${weekInfo.year} 年<br>             所屬週數：第 ${weekInfo.week} 週<br>             對應TRACE ID：${traceId}<br>             本週區間：${formatDate(production.start)} ~ ${formatDate(production.end)}<br>             到期區間：${formatDate(expire.start)} ~ ${formatDate(expire.end)}<br>             距離到期：${diffDays < 0 ?已超過 ${Math.abs(diffDays)} 天` : `剩餘 ${diffDays} 天}         </div>     ;
-}
+  document.getElementById('traceBtn').addEventListener('click', checkTrace);
+  document.getElementById('dateBtn').addEventListener('click', checkDate);
+
+  traceInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') checkTrace();
+  });
+  dateInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') checkDate();
+  });
+});
 </script>
 </body>
 </html>
