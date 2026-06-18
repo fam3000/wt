@@ -31,12 +31,6 @@ body{
     color:#111827;
 }
 
-/* 新增：返回主頁按鈕區 */
-.top-nav-bar{
-    text-align:center;
-    margin-bottom:8px;
-}
-
 /* 列印按鈕：頂部獨立區塊 + 柔和綠色 */
 .top-print-bar{
     text-align: center;
@@ -156,14 +150,6 @@ textarea:focus{
     background-color: #45a475;
 }
 
-/* 新增：返回主頁按鈕樣式 */
-.btn-home{
-    background:#f59e0b;
-}
-.btn-home:hover{
-    background:#d97706;
-}
-
 .preview-wrap{
     background:#fff;
     border-radius:10px;
@@ -272,8 +258,7 @@ textarea:focus{
     }
 
     .set-panel,
-    .top-print-bar,
-    .top-nav-bar{
+    .top-print-bar{
         display:none !important;
     }
 
@@ -319,18 +304,11 @@ textarea:focus{
 </head>
 
 <body>
-
-<!-- 新增：返回主頁按鈕 -->
-<div class="top-nav-bar">
-    <button class="btn btn-home" onclick="window.location.href='index.html'">返回主頁</button>
-</div>
-
 <div class="top-print-bar">
     <button class="btn btn-print" onclick="doPrint()">列印表單</button>
 </div>
 
 <div class="set-panel" id="formPanel">
-    <!-- 表單模板 -->
     <h3>表單模板</h3>
     <div class="row-item">
         <div class="input-wrap" style="flex:1 1 100%;">
@@ -345,10 +323,8 @@ textarea:focus{
         <button class="btn" onclick="clearTemplate()">清除</button>
     </div>
 
-    <!-- 表單設定：已整合頂端文字設定 -->
     <h3 style="margin-top:10px;">表單設定</h3>
 
-    <!-- 移除套用按鈕，輸入即時生效 -->
     <div class="row-item">
         <div class="input-wrap">
             <input type="text" id="leftCustomText" value="轉移倉別：">
@@ -416,7 +392,6 @@ textarea:focus{
         <button class="btn btn-secondary" type="button" onclick="toggleHints()" id="hintToggleBtn">隱藏提示</button>
     </div>
 
-    <!-- 表格內容批量輸入 -->
     <h3 style="margin-top:10px;">表格內容批量輸入（自動偵測行數建立對應列）</h3>
     <div class="row-item">
         <div class="input-wrap" style="flex:1 1 100%;">
@@ -429,7 +404,6 @@ textarea:focus{
         <button class="btn" onclick="fillBatchContent()">自動依據行數建立表格並填充內容</button>
     </div>
 
-    <!-- 備註內容 -->
     <div class="row-item" style="margin-top:10px;">
         <div class="input-wrap" style="flex:1 1 100%;">
             <textarea id="remarkInput">備註：
@@ -443,7 +417,6 @@ textarea:focus{
         <button class="btn btn-secondary" onclick="setRemarkAlign('center')">置中</button>
         <button class="btn btn-secondary" onclick="setRemarkAlign('right')">靠右</button>
     </div>
-
 </div>
 
 <div class="preview-wrap">
@@ -483,7 +456,6 @@ const defaultTemplate = {
   "remarkAlign": "left"
 };
 
-// 移除獨立套用按鈕，改為輸入即時更新
 function applyLeftText(){
     const text = document.getElementById('leftCustomText').value;
     const size = document.getElementById('leftTextSize').value + 'px';
@@ -492,7 +464,6 @@ function applyLeftText(){
     showDom.style.fontSize = size;
 }
 
-// 時間格式化
 function formatDateTime(date){
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -503,7 +474,6 @@ function formatDateTime(date){
 }
 
 window.onload = function(){
-    // 開頁直接載入預設模板
     loadObjTemplate(defaultTemplate);
     const now = new Date();
     document.getElementById("createTime").innerText = formatDateTime(now);
@@ -511,7 +481,6 @@ window.onload = function(){
     renderTable();
 };
 
-// 載入物件格式模板
 function loadObjTemplate(template){
     document.getElementById("leftCustomText").value = template.leftCustomText;
     document.getElementById("leftTextSize").value = template.leftTextSize;
