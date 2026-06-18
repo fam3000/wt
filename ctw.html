@@ -309,6 +309,7 @@ textarea:focus{
 </div>
 
 <div class="set-panel" id="formPanel">
+    <!-- 表單模板 -->
     <h3>表單模板</h3>
     <div class="row-item">
         <div class="input-wrap" style="flex:1 1 100%;">
@@ -323,8 +324,10 @@ textarea:focus{
         <button class="btn" onclick="clearTemplate()">清除</button>
     </div>
 
+    <!-- 表單設定：已整合頂端文字設定 -->
     <h3 style="margin-top:10px;">表單設定</h3>
 
+    <!-- 移除套用按鈕，輸入即時生效 -->
     <div class="row-item">
         <div class="input-wrap">
             <input type="text" id="leftCustomText" value="轉移倉別：">
@@ -392,6 +395,7 @@ textarea:focus{
         <button class="btn btn-secondary" type="button" onclick="toggleHints()" id="hintToggleBtn">隱藏提示</button>
     </div>
 
+    <!-- 表格內容批量輸入 -->
     <h3 style="margin-top:10px;">表格內容批量輸入（自動偵測行數建立對應列）</h3>
     <div class="row-item">
         <div class="input-wrap" style="flex:1 1 100%;">
@@ -404,6 +408,7 @@ textarea:focus{
         <button class="btn" onclick="fillBatchContent()">自動依據行數建立表格並填充內容</button>
     </div>
 
+    <!-- 備註內容 -->
     <div class="row-item" style="margin-top:10px;">
         <div class="input-wrap" style="flex:1 1 100%;">
             <textarea id="remarkInput">備註：
@@ -417,6 +422,7 @@ textarea:focus{
         <button class="btn btn-secondary" onclick="setRemarkAlign('center')">置中</button>
         <button class="btn btn-secondary" onclick="setRemarkAlign('right')">靠右</button>
     </div>
+
 </div>
 
 <div class="preview-wrap">
@@ -456,6 +462,7 @@ const defaultTemplate = {
   "remarkAlign": "left"
 };
 
+// 移除獨立套用按鈕，改為輸入即時更新
 function applyLeftText(){
     const text = document.getElementById('leftCustomText').value;
     const size = document.getElementById('leftTextSize').value + 'px';
@@ -464,16 +471,18 @@ function applyLeftText(){
     showDom.style.fontSize = size;
 }
 
+// 時間格式化
 function formatDateTime(date){
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
     const d = String(date.getDate()).padStart(2, "0");
     const h = String(date.getHours()).padStart(2, "0");
     const mi = String(date.getMinutes()).padStart(2, "0");
-    return `${y}-${m}-${d} ${h}:${mi}`;
+    return ${y}-${m}-${d} ${h}:${mi};
 }
 
 window.onload = function(){
+    // 開頁直接載入預設模板
     loadObjTemplate(defaultTemplate);
     const now = new Date();
     document.getElementById("createTime").innerText = formatDateTime(now);
@@ -481,6 +490,7 @@ window.onload = function(){
     renderTable();
 };
 
+// 載入物件格式模板
 function loadObjTemplate(template){
     document.getElementById("leftCustomText").value = template.leftCustomText;
     document.getElementById("leftTextSize").value = template.leftTextSize;
@@ -567,12 +577,17 @@ function restoreTableData(){
     });
 }
 
+// 重寫批量填充：自動根據換行行數修改表格總列數，再填入資料
 function fillBatchContent(){
     const content = document.getElementById("batchContent").value;
     if(!content) return;
+    // 拆分非空行
     const rows = content.split("\n").filter(item => item.trim() !== "");
+    // 自動修改列數輸入框數值
     document.getElementById("rowCount").value = rows.length;
+    // 重新渲染對應行數的表格
     renderTable();
+    // 等待表格渲染完成再填入內容
     setTimeout(()=>{
         const table = document.querySelector(".edit-table");
         if(!table) return;
@@ -627,6 +642,7 @@ function copyTemplate(){
     document.execCommand("copy");
 }
 
+// 修正貼上按鈕，點擊直接執行
 function pasteTemplate(){
     navigator.clipboard.readText()
     .then(text => {
@@ -672,7 +688,7 @@ function renderTable(){
     html += "<thead><tr>";
 
     for(let i = 0; i < colCount; i++){
-        html += `<th style="width:${widths[i] || 70}px">${names[i] || ""}</th>`;
+        html +=             <th style="width:${widths[i] || 70}px">                 ${names[i] || ""}             </th>        ;
     }
 
     html += "</tr></thead><tbody>";
@@ -680,7 +696,7 @@ function renderTable(){
     for(let r = 0; r < rowCount; r++){
         html += "<tr>";
         for(let c = 0; c < colCount; c++){
-            html += `<td contenteditable="true"></td>`;
+            html += <td contenteditable="true"></td>;
         }
         html += "</tr>";
     }
@@ -696,19 +712,13 @@ function doPrint(){
     document.getElementById("printTime").innerText = formatDateTime(now);
 
     const dir = document.getElementById("pageDir").value;
-    document.getElementById("pageStyle").innerHTML = `@page{
-        size:A4 ${dir};
-        margin:5mm;
-        @top-left: "";
-        @top-right: "";
-        @bottom-left: "";
-        @bottom-right: "";
-    }`;
+    document.getElementById("pageStyle").innerHTML =     @page{         size:A4 ${dir};         margin:5mm;         @top-left: "";         @top-right: "";         @bottom-left: "";         @bottom-right: "";     }    ;
     setTimeout(() => {
         window.print();
     }, 150);
 }
 
+// 頂端文字、字號 輸入即時更新，不再需要套用按鈕
 document.getElementById("leftCustomText").addEventListener("input", applyLeftText);
 document.getElementById("leftTextSize").addEventListener("input", applyLeftText);
 
