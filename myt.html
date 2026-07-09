@@ -9,9 +9,9 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:"Microsoft JhengHei","PingFang TC",Arial,sans-serif;color:#000;font-weight:700}
 :root{
   --bp-font-size:80px;
-  --title-font-size:18px;
+  --title-font-size:80px;
   --field-align:center;
-  --line:2px solid #000;
+  --line:3px solid #000;
   --page-w:210mm;
   --page-min-h:297mm
 }
@@ -40,16 +40,30 @@ button{border:none;border-radius:999px;padding:10px 14px;cursor:pointer}
 .table-block{margin-bottom:10mm;page-break-inside:avoid;break-inside:avoid}
 .label-title{font-size:var(--title-font-size);text-align:center;letter-spacing:1px;margin-bottom:6px}
 .main-table{width:100%;border-collapse:collapse;table-layout:fixed}
-.main-table td{border:var(--line);padding:4px 6px;text-align:center;vertical-align:middle;height:42px}
-.label-col{width:22%;background:#fff;font-size:14px}
+.main-table td{border:var(--line);padding:4px 6px;text-align:center;vertical-align:middle;height:42px;font-size:30px;font-weight:bold}
+.label-col{width:22%;background:#fff}
 .data-col{width:32%}
 .barcode-col{width:46%;padding:2px}
 .merged-mid{border-right:none!important}
 .merged-right{border-left:none!important}
-.data-col input,.barcode-col input,.title-input{width:100%;border:none;outline:none;background:transparent;text-align:var(--field-align);font-size:14px}
-.title-input{font-size:var(--title-font-size)}
+.data-col input,.barcode-col input,.title-input{width:100%;border:none;outline:none;background:transparent;text-align:var(--field-align);font-size:30px;font-weight:bold}
+.title-input{font-size:var(--title-font-size);font-weight:bold}
 .barcode-col svg{max-width:100%;height:32px;display:block;margin:0 auto}
 .bigBpInput{border:none !important;font-size:var(--bp-font-size) !important;font-weight:1000;text-align:center !important;width:100%;height:100%;outline:none;background:transparent;letter-spacing:1px;line-height:1;vertical-align:middle;padding:0}
+.val5{
+  font-size:20px !important;
+  width:100%;
+  border:none;
+  outline:none;
+  background:transparent;
+  text-align:var(--field-align);
+  white-space:pre-wrap !important;
+  word-break:break-all !important;
+  overflow-wrap:anywhere !important;
+  resize:none;
+  min-height:40px;
+  height:auto;
+}
 .block-toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin:0 0 6px}
 .block-toolbar button{padding:6px 10px;border-radius:999px;font-size:12px}
 .muted{color:#555;font-weight:700}
@@ -65,9 +79,9 @@ button{border:none;border-radius:999px;padding:10px 14px;cursor:pointer}
   .app{display:block}
   .preview-wrap{display:block}
   .a4-page{width:100%;min-height:auto;border:none;padding:0;margin:0;box-shadow:none;page-break-inside:avoid;break-inside:avoid}
-  .table-block{margin-bottom:8mm;page-break-inside:avoid;break-inside:avoid}
+  .table-block{margin-bottom:8mm;page-break-inside:avoid}
   .main-table,.main-table tr,.main-table td{page-break-inside:avoid!important;break-inside:avoid!important}
-  @page{size:A4;margin:8mm}
+  @page{size:A4 landscape;margin:8mm}
 }
 </style>
 </head>
@@ -75,17 +89,17 @@ button{border:none;border-radius:999px;padding:10px 14px;cursor:pointer}
 <div class="app">
   <aside class="panel">
     <h1>麥頭批量生成器</h1>
-    <p class="hint">保留原本骨架、格線與固定欄位邏輯，新增標題大小調整、零散自動判斷、快速套用全部、複製上一張、全域欄位填寫與列印優化。</p>
+    <p class="hint">保留原本骨架、格線與固定欄位邏輯，新增標題大小調整、零散自動判斷、全域即時同步、複製上一張、全域欄位填寫與列印優化。</p>
 
     <h2>頁面設定</h2>
     <div class="row">
       <label>
         <div class="small muted">預設大標題</div>
-        <input id="globalPageTitle" value="竹北A3廠TO東明倉" />
+        <input id="globalPageTitle" value="竹北A3廠To康宏東明倉" />
       </label>
       <label>
         <div class="small muted">標題文字大小(px)</div>
-        <input id="titleFontSizeInput" type="number" min="12" max="36" value="18" />
+        <input id="titleFontSizeInput" type="number" min="12" max="120" value="80" />
       </label>
     </div>
     <div class="row" style="margin-top:10px;">
@@ -113,14 +127,14 @@ button{border:none;border-radius:999px;padding:10px 14px;cursor:pointer}
       <label>
         <div class="small muted">列印方向</div>
         <select id="printOrientation">
-          <option value="portrait" selected>直式</option>
-          <option value="landscape">橫式</option>
+          <option value="portrait">直式</option>
+          <option value="landscape" selected>橫式</option>
         </select>
       </label>
     </div>
 
     <h2>批量資料</h2>
-    <p class="small muted">格式：每行一張；欄位依序為 棧板編號, 料號, 片數箱數, 每板數量, 箱數, 跳過欄, DATE CODE</p>
+    <p class="small muted">格式：每行一張；欄位依序為 棧板編號, 料號, 算式/片數*箱數, 每板數量, 箱數, 跳過欄, DATE CODE</p>
     <textarea id="batchText" placeholder="A01,180-16612-DFGF-E30,10×4+15×7+20×1,165,12,2612165,2026/03/16
 A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23"></textarea>
     <div class="row-4">
@@ -136,7 +150,7 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23"></textarea>
     <h2>全域快速填寫</h2>
     <div class="row-3">
       <label><div class="small muted">TICKET#</div><input id="bulkTicket" placeholder="輸入TICKET編號" /></label>
-      <label><div class="small muted">出廠日期</div><input id="bulkOutDate" placeholder="例如 2026/6/15" /></label>
+      <label><div class="small muted">出廠日期</div><input id="bulkOutDate" placeholder="自動帶入當日，可手動修改" /></label>
       <label><div class="small muted">板材積(cm)</div><input id="bulkVolume" value="未超材" /></label>
     </div>
     <div class="row-3" style="margin-top:10px;">
@@ -167,9 +181,58 @@ document.addEventListener('DOMContentLoaded', function(){
   const batchText = document.getElementById('batchText');
   const printOrientation = document.getElementById('printOrientation');
   const titleFontSizeInput = document.getElementById('titleFontSizeInput');
+  const bulkOutDateInput = document.getElementById('bulkOutDate');
+  const bulkTicket = document.getElementById('bulkTicket');
+  const bulkVolume = document.getElementById('bulkVolume');
+  const bulkWeight = document.getElementById('bulkWeight');
+  const bulkTopNote = document.getElementById('bulkTopNote');
+  const bulkBP = document.getElementById('bulkBP');
+  const globalPageTitle = document.getElementById('globalPageTitle');
+
+  const bulkInputs = [bulkTicket, bulkOutDateInput, bulkVolume, bulkWeight, bulkTopNote, bulkBP, globalPageTitle];
+
   const defaultDemo = `A01,180-16612-DFGF-E30,10×4+15×7+20×1,165,12,2612*165,2026/03/16
 A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
   let alignValue = 'center';
+
+  // 自動填入今日日期 YYYY/MM/DD
+  function getTodayDate(){
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,'0');
+    const d = String(now.getDate()).padStart(2,'0');
+    return `${y}/${m}/${d}`;
+  }
+  bulkOutDateInput.value = getTodayDate();
+
+  // 全域欄位即時同步所有麥頭
+  function realtimeSyncAll(){
+    const fields = {
+      val0: bulkTicket.value,
+      outDate: bulkOutDateInput.value,
+      volume: bulkVolume.value,
+      weight: bulkWeight.value,
+      topNote: bulkTopNote.value,
+      bpCode: bulkBP.value,
+      pageTitle: globalPageTitle.value
+    };
+
+    previewWrap.querySelectorAll('.table-block').forEach(function(block){
+      if(block.querySelector('.val0')) block.querySelector('.val0').value = fields.val0;
+      if(block.querySelector('.outDate')) block.querySelector('.outDate').value = fields.outDate;
+      if(block.querySelector('.volume')) block.querySelector('.volume').value = fields.volume;
+      if(block.querySelector('.weight')) block.querySelector('.weight').value = fields.weight;
+      if(block.querySelector('.topNote')) block.querySelector('.topNote').value = fields.topNote;
+      if(block.querySelector('.bpCode')) block.querySelector('.bpCode').value = fields.bpCode;
+      if(block.querySelector('.page-title')) block.querySelector('.page-title').value = fields.pageTitle;
+      renderBarcode(block.querySelector('.val0'), block.querySelector('.bc0'));
+    });
+  }
+
+  // 綁定所有全域輸入框輸入事件，即時同步
+  bulkInputs.forEach(input => {
+    input.addEventListener('input', realtimeSyncAll);
+  });
 
   function esc(v=''){
     return String(v)
@@ -193,7 +256,7 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
     const perPal = row[3] || '';
     const boxNum = row[4] || '';
     const dateCode = row[6] || '';
-    const title = document.getElementById('globalPageTitle').value.trim() || '竹北A3廠TO東明倉';
+    const title = globalPageTitle.value.trim() || '竹北A3廠To康宏東明倉';
     const autoLoose = detectLoose(qtyBox);
 
     return `
@@ -240,8 +303,10 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
             <td class="barcode-col merged-right"><svg class="bc4"></svg></td>
           </tr>
           <tr>
-            <td class="label-col">片數*箱數</td>
-            <td colspan="2" class="data-col"><input class="val5 syncable" value="${esc(qtyBox.trim())}"></td>
+            <td class="label-col">算式/片數*箱數</td>
+            <td colspan="2" class="data-col">
+              <textarea class="val5 syncable">${esc(qtyBox.trim())}</textarea>
+            </td>
           </tr>
           <tr>
             <td class="label-col">板材積(cm)</td>
@@ -298,6 +363,7 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
     });
 
     block.querySelectorAll('input').forEach(function(inp){ inp.style.textAlign = alignValue; });
+    block.querySelectorAll('textarea.val5').forEach(function(txt){ txt.style.textAlign = alignValue; });
 
     const bp = block.querySelector('.bigBpInput');
     if(bp){ bp.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--bp-font-size'); }
@@ -371,6 +437,7 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
     });
     previewWrap.appendChild(firstPage);
     paginateBlocks();
+    realtimeSyncAll();
   }
 
   function collectFieldMap(block){
@@ -421,6 +488,7 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
     bindBlock(newBlock);
     applyFieldMap(newBlock, map);
     paginateBlocks();
+    realtimeSyncAll();
   }
 
   function clonePrevious(block){
@@ -439,29 +507,11 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
     }
     block.remove();
     paginateBlocks();
+    realtimeSyncAll();
   }
 
   function applyGlobalFields(){
-    const fields = {
-      val0: document.getElementById('bulkTicket').value,
-      outDate: document.getElementById('bulkOutDate').value,
-      volume: document.getElementById('bulkVolume').value,
-      weight: document.getElementById('bulkWeight').value,
-      topNote: document.getElementById('bulkTopNote').value,
-      bpCode: document.getElementById('bulkBP').value,
-      pageTitle: document.getElementById('globalPageTitle').value
-    };
-
-    previewWrap.querySelectorAll('.table-block').forEach(function(block){
-      if(block.querySelector('.val0')) block.querySelector('.val0').value = fields.val0;
-      if(block.querySelector('.outDate')) block.querySelector('.outDate').value = fields.outDate;
-      if(block.querySelector('.volume')) block.querySelector('.volume').value = fields.volume;
-      if(block.querySelector('.weight')) block.querySelector('.weight').value = fields.weight;
-      if(block.querySelector('.topNote')) block.querySelector('.topNote').value = fields.topNote;
-      if(block.querySelector('.bpCode')) block.querySelector('.bpCode').value = fields.bpCode;
-      if(block.querySelector('.page-title')) block.querySelector('.page-title').value = fields.pageTitle;
-      renderBarcode(block.querySelector('.val0'), block.querySelector('.bc0'));
-    });
+    realtimeSyncAll();
   }
 
   function syncFirstToAll(){
@@ -500,7 +550,7 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
   });
 
   titleFontSizeInput.addEventListener('input', function(e){
-    const size = Number(e.target.value) || 18;
+    const size = Number(e.target.value) || 80;
     root.style.setProperty('--title-font-size', size + 'px');
     document.querySelectorAll('.title-input').forEach(function(el){ el.style.fontSize = size + 'px'; });
   });
@@ -509,6 +559,7 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
     alignValue = e.target.value;
     root.style.setProperty('--field-align', alignValue);
     previewWrap.querySelectorAll('.table-block input').forEach(function(inp){ inp.style.textAlign = alignValue; });
+    previewWrap.querySelectorAll('.table-block textarea.val5').forEach(function(txt){ txt.style.textAlign = alignValue; });
   });
 
   document.getElementById('generateBtn').addEventListener('click', function(){
@@ -518,7 +569,6 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
       return;
     }
     buildFromLines(lines);
-    applyGlobalFields();
   });
 
   document.getElementById('demoBtn').addEventListener('click', function(){ batchText.value = defaultDemo; });
@@ -538,8 +588,8 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
     }
     previewWrap.querySelector('.a4-page').appendChild(block);
     bindBlock(block);
-    applyGlobalFields();
     paginateBlocks();
+    realtimeSyncAll();
   });
 
   document.getElementById('printBtn').addEventListener('click', function(){
@@ -553,6 +603,9 @@ A02,180-16612-DFGF-E30,20×10,200,10,2613*200,2026/03/23`;
     document.head.appendChild(style);
     window.print();
   });
+
+  // 初始化同步
+  realtimeSyncAll();
 });
 </script>
 </body>
