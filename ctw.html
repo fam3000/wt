@@ -405,10 +405,13 @@ textarea:focus{
 
     <div class="row-item" style="margin-top:10px;">
         <div class="input-wrap" style="flex:1 1 100%;">
-            <textarea id="remarkInput">備註：
-1.計算公式=片數*箱數
-2.轉換日期=Date code日期
-3.工號簽名：</textarea>
+<textarea id="remarkInput">備註：
+1.棧號 = “相同棧號”代表同一板、”英文”代表同庫別、”數字”代表第幾板
+2.計算公式 = 片數*箱數
+3.轉換日期 = Date code日期
+4.虛擬儲位：
+5.總共幾板：
+6.工號簽名：</textarea>
         </div>
     </div>
     <div class="row-item">
@@ -450,7 +453,7 @@ const defaultTemplate = {
   "rowCount": "4",
   "colNames": "棧號，料號，計算公式，QTY，箱，Date Code，轉換日期",
   "colWidths": "30，80，50，30，15，100，70",
-  "remarkInput": "備註：\n1.計算公式=片數*箱數\n2.轉換日期=Date code日期\n3.工號簽名：",
+  "remarkInput": "備註：\n1.棧號 = “相同棧號”代表同一板、”英文”代表同庫別、”數字”代表第幾板\n2.計算公式 = 片數*箱數\n3.轉換日期 = Date code日期\n4.虛擬儲位：\n5.總共幾板：\n6.工號簽名：",
   "remarkAlign": "left"
 };
 
