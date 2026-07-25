@@ -1,0 +1,16 @@
+{
+  "name": "PCB工具",
+  "short_name": "PCB",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#495057",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "wistron-pcb-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
