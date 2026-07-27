@@ -352,7 +352,14 @@
         .btn-load-import,
         .btn-copy-full,
         .btn-pda-toggle,
-        .btn-pda-submit {
+        .btn-pda-submit,
+        .pda-scan-undo,
+        .pda-m-del,
+        .pda-m-submit,
+        .btn-pda-add-row,
+        .btn-pda-batch,
+        .confirm-cancel,
+        .confirm-ok {
             -webkit-appearance: none;
             appearance: none;
         }
@@ -403,7 +410,7 @@
             cursor: pointer;
         }
 
-        /* 新增 PDA掃碼工具 樣式 */
+        /* 原有 PDA掃碼工具 樣式（保持不變） */
         .pda-wrap {
             margin-bottom:12px;
         }
@@ -461,7 +468,237 @@
             cursor:pointer;
         }
 
-        /* 列印專用樣式 */
+        /* ===== 新增功能樣式（追加，不改原有） ===== */
+
+        /* PDA掃碼狀態列：筆數 + 重複提示 + 回上一步 */
+        .pda-scan-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0 2px;
+        }
+        .pda-scan-count {
+            font-size: 14px;
+            color: #e6edf3;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pda-scan-count strong {
+            color: #58a6ff;
+            font-size: 16px;
+        }
+        .pda-dup-info {
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pda-dup-full {
+            color: #f85149;
+            font-weight: 600;
+        }
+        .pda-dup-partial {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        .pda-scan-undo {
+            height: 32px;
+            padding: 0 12px;
+            background: #da3633;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* PDA新增輸入列：迷你PDA框（只有料號+片數兩格） */
+        .pda-manual-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .pda-manual-row {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+        .pda-m-row-title {
+            font-size: 13px;
+            color: #58a6ff;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .pda-m-part {
+            width: 100%;
+            height: 36px;
+            padding: 0 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-size: 14px;
+        }
+        .pda-m-part:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .pda-m-qty {
+            width: 100%;
+            height: 36px;
+            padding: 0 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-size: 14px;
+        }
+        .pda-m-qty:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .pda-m-del {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            background: #da3633;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .pda-m-submit {
+            width: 100%;
+            height: 34px;
+            background: #238636;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* PDA新增輸入列按鈕 */
+        .btn-pda-add-row {
+            width: 100%;
+            height: 38px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        /* PDA全部列一次送出按鈕 */
+        .btn-pda-batch {
+            width: 100%;
+            height: 40px;
+            background: #9333ea;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        /* 確認彈窗（暗色主題，匹配原有風格） */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .confirm-box {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            width: 85%;
+            max-width: 320px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .confirm-icon {
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .confirm-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #58a6ff;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .confirm-msg {
+            font-size: 14px;
+            color: #e6edf3;
+            margin-bottom: 16px;
+            line-height: 1.6;
+            text-align: center;
+            white-space: pre-line;
+        }
+        .confirm-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .confirm-cancel {
+            flex: 1;
+            height: 40px;
+            background: #444c56;
+            color: #e6edf3;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .confirm-ok {
+            flex: 1;
+            height: 40px;
+            background: #238636;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .confirm-ok.confirm-danger {
+            background: #da3633;
+        }
+        .confirm-ok.confirm-purple {
+            background: #9333ea;
+        }
+        .confirm-ok.confirm-blue {
+            background: #2563eb;
+        }
+        .confirm-ok.confirm-teal {
+            background: #0891b2;
+        }
+
+        /* 列印專用樣式（保持不變） */
         @media print {
             body, html {
                 background: #fff !important;
@@ -514,17 +751,41 @@
     <div class="container">
         <h1>PCB / 料件箱數統計系統</h1>
 
-        <!-- 新增 PDA掃碼工具 展開收合區塊 -->
+        <!-- PDA掃碼工具（原有結構保留，內部擴充新功能） -->
         <div class="pda-wrap">
             <button class="btn-pda-toggle" onclick="app.togglePdaBox()">PDA掃碼工具</button>
             <div class="pda-box" id="pdaBox">
+                <!-- 原有：棧號輸入 -->
                 <input class="pda-input" id="pdaStack" placeholder="輸入棧號">
+
+                <!-- 新增：筆數提示 + 重複提示 + 回上一步 -->
+                <div class="pda-scan-status">
+                    <span class="pda-scan-count">
+                        目前筆數：<strong id="pdaScanCount">0</strong>
+                        <span class="pda-dup-info" id="pdaDupInfo"></span>
+                    </span>
+                    <button class="pda-scan-undo" onclick="app.pdaScanUndo()">↩ 回上一步</button>
+                </div>
+
+                <!-- 原有：掃碼textarea -->
                 <textarea class="pda-textarea" id="pdaScanText" placeholder="貼上PDA掃描條碼，每行一筆
 格式範例：料號-001|TR-252001|150||S0001"></textarea>
-                <button class="btn-pda-submit" onclick="app.parsePdaScan()">解析並匯入統計</button>
+
+                <!-- 原有：解析並匯入統計（改為需確認） -->
+                <button class="btn-pda-submit" onclick="app.confirmPdaParse()">解析並匯入統計</button>
+
+                <!-- 新增：新增輸入列按鈕（需確認） -->
+                <button class="btn-pda-add-row" onclick="app.confirmPdaAddRow()">➕ 新增輸入列</button>
+
+                <!-- 新增：手動輸入列區域（迷你PDA框，只有料號+片數兩格） -->
+                <div class="pda-manual-wrap" id="pdaManualWrap"></div>
+
+                <!-- 新增：全部列一次送出按鈕（需確認，只在有手動列時顯示） -->
+                <button class="btn-pda-batch" id="btnPdaBatch" onclick="app.confirmPdaBatchSubmit()" style="display:none;">🔹 全部列一次送出</button>
             </div>
         </div>
 
+        <!-- 原有手動輸入面板（完全不動） -->
         <div class="input-panel">
             <div id="rowsWrap">
                 <div class="input-row">
@@ -544,6 +805,7 @@
             <button class="btn-batch-all" onclick="app.batchSubmitAll()">🔹 全部列一次送出</button>
         </div>
 
+        <!-- 原有統計面板（完全不動） -->
         <div id="printArea" class="stats-panel">
             <div class="stats-title">📊 整體統計結果</div>
             <div id="mainStats"></div>
@@ -555,13 +817,14 @@
             </div>
         </div>
 
+        <!-- 原有底部按鈕（完全不動） -->
         <div class="bottom-clear">
             <button class="btn-clear-all" onclick="app.clearAll()">重置</button>
             <button class="btn-copy" onclick="app.copyResult()">複製規格化資料</button>
             <button class="btn-print" onclick="app.printData()">列印統計內容</button>
         </div>
 
-        <!-- 新增完整複製按鈕，在匯入區上方 -->
+        <!-- 原有匯入區（完全不動） -->
         <div class="import-wrap">
             <button class="btn-copy-full" onclick="app.copyFullResult()">複製規格化完整資料</button>
             <button class="btn-toggle-import" onclick="app.toggleImportBox()">展開/收合 匯入彙總規格CSV</button>
@@ -572,9 +835,24 @@
         </div>
     </div>
 
+    <!-- 新增：確認彈窗 -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <div class="confirm-icon" id="confirmIcon">⚠️</div>
+            <div class="confirm-title" id="confirmTitle">確認</div>
+            <div class="confirm-msg" id="confirmMsg">確定要執行此操作嗎？</div>
+            <div class="confirm-btns">
+                <button class="confirm-cancel" id="confirmCancelBtn" onclick="app.onConfirmCancel()">取消</button>
+                <button class="confirm-ok" id="confirmOkBtn" onclick="app.onConfirmOk()">確認</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 原有Toast（完全不動） -->
     <div class="toast" id="toast"></div>
 
     <script>
+        /* 原有工具函數（完全不動） */
         function getISOWeekDates(year, week) {
             const simple = new Date(year, 0, 1 + (week - 1) * 7);
             const dayOfWeek = simple.getDay();
@@ -588,84 +866,20 @@
         }
 
         const app = {
+            /* 原有屬性（保留） */
             rowsWrap: document.getElementById('rowsWrap'),
             mainStatsEl: document.getElementById('mainStats'),
             toastEl: document.getElementById('toast'),
             groupData: [],
 
-            // 新增 PDA 收合切換
+            /* 新增屬性：確認彈窗回呼 */
+            _confirmCallback: null,
+
+            /* ===== 原有方法（完全不動） ===== */
+
             togglePdaBox(){
                 const box = document.getElementById('pdaBox');
                 box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
-            },
-
-            // 新增 PDA掃描解析轉換函數
-            parsePdaScan(){
-                const stackVal = document.getElementById('pdaStack').value.trim();
-                const scanText = document.getElementById('pdaScanText').value.trim();
-                if(!stackVal){
-                    this.showToast('請先填寫棧號');
-                    return;
-                }
-                if(!scanText){
-                    this.showToast('請貼上PDA掃描條碼');
-                    return;
-                }
-                const lines = scanText.split('\n').filter(line=>line.trim()!=='');
-                let successCnt = 0;
-                lines.forEach(line=>{
-                    const raw = line.trim();
-                    const arr = raw.split('|');
-                    if(arr.length <5) return;
-                    // 拆分欄位
-                    const matFull = arr[0].trim();
-                    const traceFull = arr[1].trim();
-                    const qtyStr = arr[2].trim();
-                    // 截取料號、TRACE後段
-                    const matSplit = matFull.lastIndexOf('-');
-                    const traceSplit = traceFull.lastIndexOf('-');
-                    if(matSplit===-1 || traceSplit===-1 || isNaN(Number(qtyStr))) return;
-                    const part = matFull.substring(0, matSplit);
-                    const traceId = traceFull.substring(traceSplit+1);
-                    const qty = Number(qtyStr);
-
-                    // 匯入主統計邏輯，和手動送出完全一致
-                    const groupKey = stackVal + '|' + part;
-                    let targetGroup = this.groupData.find(g=>g.key===groupKey);
-                    if(!targetGroup){
-                        targetGroup = {
-                            key: groupKey,
-                            stack: stackVal,
-                            part: part,
-                            totalQty:0,
-                            totalBox:0,
-                            qtyBoxMap:{},
-                            traceMap:{}
-                        };
-                        this.groupData.push(targetGroup);
-                    }
-                    // 單箱數量
-                    targetGroup.totalQty += qty;
-                    targetGroup.totalBox +=1;
-                    targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty]||0)+1;
-                    // TRACE 紀錄
-                    if(!targetGroup.traceMap[traceId]){
-                        targetGroup.traceMap[traceId] = {totalPc:0, boxNum:0, pcList:[]};
-                    }
-                    const traceItem = targetGroup.traceMap[traceId];
-                    traceItem.totalPc += qty;
-                    traceItem.boxNum +=1;
-                    traceItem.pcList.push(qty);
-                    successCnt++;
-                });
-                if(successCnt===0){
-                    this.showToast('無有效掃描資料，檢查格式');
-                    return;
-                }
-                this.calcAll();
-                this.showToast(`解析完成，匯入${successCnt}筆掃描資料`);
-                // 清空掃描區
-                document.getElementById('pdaScanText').value = '';
             },
 
             insertSpace(btn) {
@@ -878,6 +1092,10 @@
                         </div>
                     </div>
                 `;
+                /* 新增：同時重置PDA手動輸入列和掃碼區 */
+                this.resetPdaManualWrap();
+                document.getElementById('pdaScanText').value = '';
+                this.pdaScanCountUpdate();
                 this.calcAll();
                 this.showToast('已重置');
             },
@@ -949,7 +1167,7 @@
                 return formatDate(startDate);
             },
 
-            // 原有壓縮匯出（維持不變）
+            /* 原有壓縮匯出（維持不變） */
             copyResult() {
                 if(this.groupData.length === 0){
                     this.showToast('尚無資料可複製');
@@ -987,7 +1205,7 @@
                 });
             },
 
-            // 新增：完整明細匯出，包含每個TRACE的箱數、原始箱片陣列
+            /* 新增：完整明細匯出（維持不變） */
             copyFullResult() {
                 const jsonStr = JSON.stringify(this.groupData, null, 2);
                 navigator.clipboard.writeText(jsonStr).then(()=>{
@@ -1025,7 +1243,6 @@
                     return;
                 }
 
-                // 判斷是JSON完整備份還是舊式CSV彙總
                 if (text.trim().startsWith('[')) {
                     try {
                         const restore = JSON.parse(text);
@@ -1038,7 +1255,6 @@
                     } catch (e) {}
                 }
 
-                // 舊CSV彙總匯入
                 const lines = text.split('\n').filter(line => line.trim() !== '');
                 const newGroupData = [];
 
@@ -1089,9 +1305,479 @@
                 this.groupData = newGroupData;
                 this.calcAll();
                 this.showToast('彙總資料匯入完成（明細數據無法還原）');
+            },
+
+            /* ===== 新增方法：確認彈窗系統 ===== */
+
+            showConfirmModal(options) {
+                /* options: { icon, title, msg, confirmText, confirmClass, onConfirm } */
+                const overlay = document.getElementById('confirmOverlay');
+                document.getElementById('confirmIcon').textContent = options.icon || '⚠️';
+                document.getElementById('confirmTitle').textContent = options.title || '確認';
+                document.getElementById('confirmMsg').textContent = options.msg || '確定要執行此操作嗎？';
+                const okBtn = document.getElementById('confirmOkBtn');
+                okBtn.textContent = options.confirmText || '確認';
+                okBtn.className = 'confirm-ok';
+                if (options.confirmClass) {
+                    okBtn.classList.add(options.confirmClass);
+                }
+                this._confirmCallback = options.onConfirm || null;
+                overlay.style.display = 'flex';
+            },
+
+            hideConfirmModal() {
+                document.getElementById('confirmOverlay').style.display = 'none';
+                this._confirmCallback = null;
+            },
+
+            onConfirmOk() {
+                if (this._confirmCallback) {
+                    this._confirmCallback();
+                }
+                this.hideConfirmModal();
+            },
+
+            onConfirmCancel() {
+                this.hideConfirmModal();
+            },
+
+            /* ===== 新增方法：PDA掃碼即時筆數與重複檢測 ===== */
+
+            /* 解析textarea中每一行，提取料號/片數/TRACE ID/流水號 */
+            pdaParseLine(raw) {
+                const arr = raw.split('|');
+                if (arr.length < 5) return null;
+                const matFull = arr[0].trim();
+                const traceFull = arr[1].trim();
+                const qtyStr = arr[2].trim();
+                const serialNo = arr[4] ? arr[4].trim() : '';
+                const matSplit = matFull.lastIndexOf('-');
+                const traceSplit = traceFull.lastIndexOf('-');
+                if (matSplit === -1 || traceSplit === -1 || isNaN(Number(qtyStr))) return null;
+                const part = matFull.substring(0, matSplit);
+                const traceId = traceFull.substring(traceSplit + 1);
+                const qty = Number(qtyStr);
+                return { part: part, qty: qty, traceId: traceId, serialNo: serialNo };
+            },
+
+            /* 即時更新textarea筆數和重複檢測 */
+            pdaScanCountUpdate() {
+                const scanText = document.getElementById('pdaScanText').value;
+                const lines = scanText.split('\n').filter(line => line.trim() !== '');
+                const countEl = document.getElementById('pdaScanCount');
+                const dupInfoEl = document.getElementById('pdaDupInfo');
+
+                /* 計算有效行數 */
+                let validCount = 0;
+                const parsedLines = [];
+                lines.forEach(line => {
+                    const parsed = this.pdaParseLine(line.trim());
+                    if (parsed) {
+                        validCount++;
+                        parsedLines.push(parsed);
+                    }
+                });
+
+                countEl.textContent = validCount;
+
+                /* 重複檢測 */
+                let fullDupCount = 0;
+                let partialDupCount = 0;
+                const seenKeys = {};
+
+                for (let i = 0; i < parsedLines.length; i++) {
+                    const p = parsedLines[i];
+                    /* 全重複key：料號+片數+TRACE ID+流水號 */
+                    const fullKey = p.part + '|' + p.qty + '|' + p.traceId + '|' + p.serialNo;
+                    /* 部分重複key：料號+片數+TRACE ID（不含流水號） */
+                    const partialKey = p.part + '|' + p.qty + '|' + p.traceId;
+
+                    if (seenKeys[fullKey]) {
+                        /* 全重複：料號+片數+TRACE ID+流水號都相同 → 錯誤 */
+                        fullDupCount++;
+                    } else {
+                        if (seenKeys[partialKey]) {
+                            /* 部分重複：料號+片數+TRACE ID相同但流水號不同 → 正常，但仍標記 */
+                            partialDupCount++;
+                        }
+                        seenKeys[fullKey] = true;
+                        seenKeys[partialKey] = true;
+                    }
+                }
+
+                /* 顯示重複提示 */
+                let dupHtml = '';
+                if (fullDupCount > 0) {
+                    dupHtml += '<span class="pda-dup-full">⚠️ ' + fullDupCount + '筆完全重複（錯誤）</span>';
+                }
+                if (partialDupCount > 0) {
+                    if (dupHtml) dupHtml += ' ';
+                    dupHtml += '<span class="pda-dup-partial">ℹ️ ' + partialDupCount + '筆部分重複（正常）</span>';
+                }
+                dupInfoEl.innerHTML = dupHtml;
+            },
+
+            /* 回上一步：刪除textarea中最後一行（剛刷的那筆） */
+            pdaScanUndo() {
+                const textarea = document.getElementById('pdaScanText');
+                const value = textarea.value;
+                if (!value.trim()) {
+                    this.showToast('沒有可撤銷的掃描資料');
+                    return;
+                }
+
+                /* 刪除最後一行 */
+                const lines = value.split('\n');
+                /* 從後往前找到最後一個非空行並刪除 */
+                let lastNonEmptyIndex = -1;
+                for (let i = lines.length - 1; i >= 0; i--) {
+                    if (lines[i].trim() !== '') {
+                        lastNonEmptyIndex = i;
+                        break;
+                    }
+                }
+
+                if (lastNonEmptyIndex === -1) {
+                    this.showToast('沒有可撤銷的掃描資料');
+                    return;
+                }
+
+                const deletedLine = lines[lastNonEmptyIndex].trim();
+                lines.splice(lastNonEmptyIndex, 1);
+                textarea.value = lines.join('\n');
+
+                /* 即時更新筆數和重複檢測 */
+                this.pdaScanCountUpdate();
+                this.showToast('已撤銷最後一筆：' + deletedLine.substring(0, 30) + (deletedLine.length > 30 ? '...' : ''));
+            },
+
+            /* ===== 新增方法：解析並匯入統計（需確認，使用原有邏輯） ===== */
+
+            confirmPdaParse() {
+                const stackVal = document.getElementById('pdaStack').value.trim();
+                const scanText = document.getElementById('pdaScanText').value.trim();
+                if (!stackVal) {
+                    this.showToast('請先填寫棧號');
+                    return;
+                }
+                if (!scanText) {
+                    this.showToast('請貼上PDA掃描條碼');
+                    return;
+                }
+                const lines = scanText.split('\n').filter(line => line.trim() !== '');
+                /* 先檢測重複數量，顯示在確認彈窗中 */
+                const parsedLines = [];
+                let fullDupCount = 0;
+                lines.forEach(line => {
+                    const parsed = this.pdaParseLine(line.trim());
+                    if (parsed) parsedLines.push(parsed);
+                });
+                const seenFullKeys = {};
+                parsedLines.forEach(p => {
+                    const fullKey = p.part + '|' + p.qty + '|' + p.traceId + '|' + p.serialNo;
+                    if (seenFullKeys[fullKey]) fullDupCount++;
+                    seenFullKeys[fullKey] = true;
+                });
+
+                let msg = '確定要解析 ' + parsedLines.length + ' 筆有效掃描資料並匯入統計嗎？\n匯入後將在整體統計結果中顯示。';
+                if (fullDupCount > 0) {
+                    msg += '\n⚠️ 有 ' + fullDupCount + ' 筆完全重複將被跳過。';
+                }
+
+                this.showConfirmModal({
+                    icon: '📊',
+                    title: '解析並匯入統計',
+                    msg: msg,
+                    confirmText: '匯入',
+                    confirmClass: 'confirm-teal',
+                    onConfirm: function() { app.pdaParseAndImport(); }
+                });
+            },
+
+            /* PDA解析並匯入（使用原有parsePdaScan邏輯，直接匯入groupData） */
+            pdaParseAndImport() {
+                const stackVal = document.getElementById('pdaStack').value.trim();
+                const scanText = document.getElementById('pdaScanText').value.trim();
+                if (!stackVal) {
+                    this.showToast('請先填寫棧號');
+                    return;
+                }
+                if (!scanText) {
+                    this.showToast('請貼上PDA掃描條碼');
+                    return;
+                }
+                const lines = scanText.split('\n').filter(line => line.trim() !== '');
+                let successCnt = 0;
+                let dupSkipCnt = 0;
+
+                /* 用於追蹤本次匯入中已處理的全重複key，避免同一批次內重複匯入 */
+                const batchSeenFullKeys = {};
+
+                lines.forEach(line => {
+                    const raw = line.trim();
+                    const arr = raw.split('|');
+                    if (arr.length < 5) return;
+
+                    const matFull = arr[0].trim();
+                    const traceFull = arr[1].trim();
+                    const qtyStr = arr[2].trim();
+                    const serialNo = arr[4] ? arr[4].trim() : '';
+
+                    const matSplit = matFull.lastIndexOf('-');
+                    const traceSplit = traceFull.lastIndexOf('-');
+                    if (matSplit === -1 || traceSplit === -1 || isNaN(Number(qtyStr))) return;
+
+                    const part = matFull.substring(0, matSplit);
+                    const traceId = traceFull.substring(traceSplit + 1);
+                    const qty = Number(qtyStr);
+
+                    /* 全重複檢測：料號+片數+TRACE ID+流水號全相同 → 跳過 */
+                    const fullDupKey = part + '|' + qty + '|' + traceId + '|' + serialNo;
+                    if (batchSeenFullKeys[fullDupKey]) {
+                        dupSkipCnt++;
+                        return;
+                    }
+                    batchSeenFullKeys[fullDupKey] = true;
+
+                    /* 使用原有邏輯匯入groupData（與原parsePdaScan完全一致） */
+                    const groupKey = stackVal + '|' + part;
+                    let targetGroup = this.groupData.find(g => g.key === groupKey);
+                    if (!targetGroup) {
+                        targetGroup = {
+                            key: groupKey,
+                            stack: stackVal,
+                            part: part,
+                            totalQty: 0,
+                            totalBox: 0,
+                            qtyBoxMap: {},
+                            traceMap: {}
+                        };
+                        this.groupData.push(targetGroup);
+                    }
+
+                    targetGroup.totalQty += qty;
+                    targetGroup.totalBox += 1;
+                    targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
+
+                    if (!targetGroup.traceMap[traceId]) {
+                        targetGroup.traceMap[traceId] = { totalPc: 0, boxNum: 0, pcList: [] };
+                    }
+                    const traceItem = targetGroup.traceMap[traceId];
+                    traceItem.totalPc += qty;
+                    traceItem.boxNum += 1;
+                    traceItem.pcList.push(qty);
+
+                    successCnt++;
+                });
+
+                if (successCnt === 0 && dupSkipCnt === 0) {
+                    this.showToast('無有效掃描資料，檢查格式');
+                    return;
+                }
+
+                let msg = '解析完成，匯入' + successCnt + '筆掃描資料';
+                if (dupSkipCnt > 0) {
+                    msg += '，' + dupSkipCnt + '筆完全重複已跳過';
+                }
+                this.showToast(msg);
+
+                /* 清空掃碼區 */
+                document.getElementById('pdaScanText').value = '';
+                this.pdaScanCountUpdate();
+                /* 更新整體統計結果顯示 */
+                this.calcAll();
+            },
+
+            /* ===== 新增方法：PDA新增輸入列（迷你框，只有料號+片數兩格） ===== */
+
+            confirmPdaAddRow() {
+                this.showConfirmModal({
+                    icon: '➕',
+                    title: '新增輸入列',
+                    msg: '確定要新增一筆手動輸入列嗎？\n新增後可填寫料號和片數，再送出或全部一次送出。',
+                    confirmText: '新增',
+                    confirmClass: 'confirm-blue',
+                    onConfirm: function() { app.pdaAddRowInternal(); }
+                });
+            },
+
+            pdaAddRowInternal() {
+                const wrap = document.getElementById('pdaManualWrap');
+                const rowCount = wrap.querySelectorAll('.pda-manual-row').length;
+                const row = document.createElement('div');
+                row.className = 'pda-manual-row';
+                row.innerHTML = `
+                    <div class="pda-m-row-title">手動輸入 #${rowCount + 1}</div>
+                    <button class="pda-m-del" onclick="app.pdaDelManualRow(this)">×</button>
+                    <input type="text" class="pda-m-part" placeholder="料號">
+                    <input type="text" inputmode="numeric" class="pda-m-qty" placeholder="片數">
+                    <button class="pda-m-submit" onclick="app.pdaSubmitManual(this)">送出本筆</button>
+                `;
+                wrap.appendChild(row);
+                /* 顯示全部列一次送出按鈕 */
+                document.getElementById('btnPdaBatch').style.display = 'block';
+                this.showToast('已新增手動輸入列 #' + (rowCount + 1));
+            },
+
+            /* PDA手動輸入列送出本筆（匯入groupData，使用原有邏輯） */
+            pdaSubmitManual(btn) {
+                const row = btn.closest('.pda-manual-row');
+                const part = row.querySelector('.pda-m-part').value.trim();
+                const qtyVal = row.querySelector('.pda-m-qty').value.trim();
+                const qty = Number(qtyVal);
+                const stackVal = document.getElementById('pdaStack').value.trim();
+
+                if (!stackVal) {
+                    this.showToast('請先在上方填寫棧號');
+                    return;
+                }
+                if (!part) {
+                    this.showToast('請輸入料號');
+                    return;
+                }
+                if (!qtyVal || qty <= 0) {
+                    this.showToast('請輸入有效片數');
+                    return;
+                }
+
+                /* 使用原有邏輯匯入groupData */
+                const groupKey = stackVal + '|' + part;
+                let targetGroup = this.groupData.find(g => g.key === groupKey);
+                if (!targetGroup) {
+                    targetGroup = {
+                        key: groupKey,
+                        stack: stackVal,
+                        part: part,
+                        totalQty: 0,
+                        totalBox: 0,
+                        qtyBoxMap: {},
+                        traceMap: {}
+                    };
+                    this.groupData.push(targetGroup);
+                }
+
+                targetGroup.totalQty += qty;
+                targetGroup.totalBox += 1;
+                targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
+
+                /* 清空此列輸入 */
+                row.querySelector('.pda-m-part').value = '';
+                row.querySelector('.pda-m-qty').value = '';
+
+                /* 更新整體統計結果顯示 */
+                this.calcAll();
+                this.showToast('✅ 已送出：' + part + ' / ' + qty + '片');
+            },
+
+            /* 刪除PDA手動輸入列 */
+            pdaDelManualRow(btn) {
+                const wrap = document.getElementById('pdaManualWrap');
+                const allRows = wrap.querySelectorAll('.pda-manual-row');
+                if (allRows.length <= 0) return;
+                btn.closest('.pda-manual-row').remove();
+                /* 如果沒有手動列了，隱藏全部送出按鈕 */
+                const remainingRows = wrap.querySelectorAll('.pda-manual-row');
+                if (remainingRows.length === 0) {
+                    document.getElementById('btnPdaBatch').style.display = 'none';
+                }
+                /* 重新編號 */
+                remainingRows.forEach((r, i) => {
+                    const titleEl = r.querySelector('.pda-m-row-title');
+                    if (titleEl) titleEl.textContent = '手動輸入 #' + (i + 1);
+                });
+            },
+
+            /* 重置PDA手動輸入列區域 */
+            resetPdaManualWrap() {
+                const wrap = document.getElementById('pdaManualWrap');
+                wrap.innerHTML = '';
+                document.getElementById('btnPdaBatch').style.display = 'none';
+            },
+
+            /* ===== 新增方法：PDA全部列一次送出（需確認） ===== */
+
+            confirmPdaBatchSubmit() {
+                const wrap = document.getElementById('pdaManualWrap');
+                const allRows = wrap.querySelectorAll('.pda-manual-row');
+                let validCount = 0;
+                allRows.forEach(row => {
+                    const part = row.querySelector('.pda-m-part').value.trim();
+                    const qtyVal = row.querySelector('.pda-m-qty').value.trim();
+                    if (part && qtyVal && Number(qtyVal) > 0) validCount++;
+                });
+
+                if (validCount === 0) {
+                    this.showToast('沒有可送出的有效資料');
+                    return;
+                }
+
+                this.showConfirmModal({
+                    icon: '🔹',
+                    title: '全部列一次送出',
+                    msg: '確定要送出 ' + validCount + ' 筆手動輸入資料到統計系統嗎？\n匯入後將在整體統計結果中顯示。',
+                    confirmText: '送出',
+                    confirmClass: 'confirm-purple',
+                    onConfirm: function() { app.pdaBatchSubmitInternal(); }
+                });
+            },
+
+            pdaBatchSubmitInternal() {
+                const wrap = document.getElementById('pdaManualWrap');
+                const allRows = wrap.querySelectorAll('.pda-manual-row');
+                const stackVal = document.getElementById('pdaStack').value.trim();
+                let successCnt = 0;
+
+                if (!stackVal) {
+                    this.showToast('請先在上方填寫棧號');
+                    return;
+                }
+
+                allRows.forEach(row => {
+                    const part = row.querySelector('.pda-m-part').value.trim();
+                    const qtyVal = row.querySelector('.pda-m-qty').value.trim();
+                    const qty = Number(qtyVal);
+
+                    if (!part || !qtyVal || qty <= 0) return;
+
+                    /* 使用原有邏輯匯入groupData */
+                    const groupKey = stackVal + '|' + part;
+                    let targetGroup = this.groupData.find(g => g.key === groupKey);
+                    if (!targetGroup) {
+                        targetGroup = {
+                            key: groupKey,
+                            stack: stackVal,
+                            part: part,
+                            totalQty: 0,
+                            totalBox: 0,
+                            qtyBoxMap: {},
+                            traceMap: {}
+                        };
+                        this.groupData.push(targetGroup);
+                    }
+
+                    targetGroup.totalQty += qty;
+                    targetGroup.totalBox += 1;
+                    targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
+
+                    successCnt++;
+
+                    /* 清空此列輸入 */
+                    row.querySelector('.pda-m-part').value = '';
+                    row.querySelector('.pda-m-qty').value = '';
+                });
+
+                if (successCnt === 0) {
+                    this.showToast('沒有可送出的有效資料');
+                    return;
+                }
+
+                /* 更新整體統計結果顯示 */
+                this.calcAll();
+                this.showToast('✅ 已送出 ' + successCnt + ' 焖手動輸入資料到統計系統');
             }
         };
 
+        /* 原有全域事件（完全不動） */
         document.addEventListener('keydown', e=>{
             if(e.key==='Enter') {
                 const lastBtn = document.querySelector('.input-row:last-child .btn-submit');
@@ -1113,6 +1799,18 @@
                 }
             } catch (err) {}
         };
+
+        /* 新增：textarea input事件監聽，即時更新筆數和重複檢測 */
+        document.getElementById('pdaScanText').addEventListener('input', function() {
+            app.pdaScanCountUpdate();
+        });
+
+        /* 新增：確認彈窗點擊遮罩關閉 */
+        document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                app.hideConfirmModal();
+            }
+        });
     </script>
 </body>
 </html>
