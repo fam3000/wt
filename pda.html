@@ -5,811 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PCB / 料件箱數統計系統</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-
-        body {
-            background-color: #0d1117;
-            color: #e6edf3;
-            padding: 12px;
-            min-height: 100vh;
-            max-width: 430px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            text-align: center;
-            margin: 8px 0 12px;
-            color: #58a6ff;
-            font-size: 17px;
-            font-weight: 600;
-        }
-
-        .input-panel {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-
-        .input-row {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 8px;
-            position: relative;
-        }
-
-        .input-row input {
-            width: 100%;
-            height: 42px;
-            padding: 0 10px;
-            background-color: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            font-size: 15px;
-        }
-
-        .input-row input:focus {
-            outline: none;
-            border-color: #58a6ff;
-        }
-
-        .btn-del-row {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 26px;
-            height: 26px;
-            background: #da3633;
-            border: none;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            z-index: 10;
-        }
-
-        .row-btn-group {
-            display: flex;
-            gap: 6px;
-        }
-
-        .btn-space {
-            flex: 1;
-            height: 42px;
-            background-color: #444c56;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .btn-submit {
-            flex: 2;
-            height: 42px;
-            background-color: #238636;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-add-row {
-            width: 100%;
-            height: 38px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 4px;
-        }
-
-        .btn-batch-all {
-            width: 100%;
-            height: 40px;
-            background-color: #9333ea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-        .stats-panel {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 12px;
-            overflow-x: hidden;
-        }
-
-        .stats-title {
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #58a6ff;
-            font-weight: 600;
-        }
-
-        .stat-group {
-            border-bottom: 1px dashed #444c56;
-            padding: 8px 0;
-        }
-        .stat-group:last-child {
-            border-bottom: none;
-        }
-
-        .stat-line {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 15px;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .stat-line span:first-child {
-            flex-shrink: 0;
-        }
-        .stat-line span:last-child {
-            flex: 1;
-            text-align: right;
-            word-wrap: break-word;
-            word-break: break-all;
-        }
-
-        .calc-line {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 15px;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .calc-line span:first-child {
-            flex-shrink: 0;
-        }
-        .calc-line span:last-child {
-            flex: 1;
-            text-align: right;
-            word-wrap: break-word;
-            word-break: break-all;
-        }
-
-        .calc-value {
-            color: #b89248;
-            font-weight: 600;
-        }
-
-        .trace-wrap {
-            margin: 6px 0;
-            padding: 6px 0;
-            border-bottom: 1px solid #22272e;
-        }
-        .trace-wrap:last-of-type {
-            border-bottom: none;
-        }
-        .trace-head {
-            display: flex;
-            gap: 8px;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 4px;
-            flex-wrap: wrap;
-        }
-        .trace-good {
-            color: #22c55e;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-        .trace-warning {
-            color: #f59e0b;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-        .trace-expired {
-            color: #f85149;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-        .trace-head-text {
-            flex: 1;
-            word-wrap: break-word;
-            word-break: break-all;
-        }
-        .trace-pc-list {
-            font-size: 14px;
-            padding-left: 42px;
-            line-height: 1.5;
-            word-wrap: break-word;
-            word-break: break-all;
-            color: #c9d1d9;
-        }
-
-        .color-desc {
-            margin-top: 12px;
-            padding-top: 8px;
-            border-top: 1px solid #22272e;
-            font-size: 13px;
-            line-height: 1.6;
-        }
+        :root { --sat: max(env(safe-area-inset-top, 0px), 24px); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        html { height: 100%; background-color: #0d1117; }
+        body { background-color: #0d1117; color: #e6edf3; min-height: 100%; max-width: 430px; margin: 0 auto; padding: 100px 12px 24px; width: 100%; }
+        .nav-bar { position: fixed; top: 0; left: 0; right: 0; height: 100px; background: #0d1117; z-index: 100; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px; padding-top: var(--sat); border-bottom: 1px solid #30363d; }
+        .nav-title { font-size: 17px; color: #58a6ff; font-weight: 600; text-align: center; }
+        .container { width: 100%; padding-bottom: 24px; }
+        .pda-wrap { margin-bottom: 12px; }
+        .btn-pda-toggle { width: 100%; height: 42px; background: #0891b2; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .pda-box { display: none; margin-top: 8px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px; flex-direction: column; gap: 8px; }
+        .pda-input { width: 100%; height: 42px; padding: 0 10px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 15px; }
+        .pda-input:focus { outline: none; border-color: #58a6ff; }
+        .pda-textarea { width: 100%; min-height: 130px; padding: 10px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 14px; resize: none; }
+        .pda-textarea:focus { outline: none; border-color: #58a6ff; }
+        .btn-pda-submit { width: 100%; height: 40px; background: #22c55e; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .pda-scan-status { display: flex; justify-content: space-between; align-items: center; padding: 6px 0 2px; }
+        .pda-scan-count { font-size: 14px; color: #e6edf3; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .pda-scan-count strong { color: #58a6ff; font-size: 16px; }
+        .pda-dup-info { font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+        .pda-dup-full { color: #f85149; font-weight: 600; }
+        .pda-scan-undo { height: 32px; padding: 0 12px; background: #da3633; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .manual-wrap { margin-bottom: 12px; }
+        .btn-manual-toggle { width: 100%; height: 42px; background: #7c3aed; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .manual-box { display: none; margin-top: 8px; }
+        .input-panel { background-color: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px; }
+        .input-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; position: relative; }
+        .input-row input { width: 100%; height: 42px; padding: 0 10px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 15px; }
+        .input-row input:focus { outline: none; border-color: #58a6ff; }
+        .btn-del-row { position: absolute; top: 2px; right: 2px; width: 26px; height: 26px; background: #da3633; border: none; color: #fff; border-radius: 4px; cursor: pointer; font-size: 14px; z-index: 10; -webkit-appearance: none; appearance: none; }
+        .row-btn-group { display: flex; gap: 6px; }
+        .btn-space { flex: 1; height: 42px; background-color: #444c56; color: #fff; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .btn-submit { flex: 2; height: 42px; background-color: #238636; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .btn-add-row { width: 100%; height: 38px; background-color: #2563eb; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; margin-top: 4px; -webkit-appearance: none; appearance: none; }
+        .btn-batch-all { width: 100%; height: 40px; background-color: #9333ea; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; -webkit-appearance: none; appearance: none; }
+        .stats-panel { background-color: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px; margin-bottom: 12px; overflow-x: hidden; }
+        .stats-title { font-size: 16px; margin-bottom: 8px; color: #58a6ff; font-weight: 600; }
+        .stats-normal {}
+        .stat-group { border-bottom: 1px dashed #444c56; padding: 8px 0; }
+        .stat-group:last-child { border-bottom: none; }
+        .stat-line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 15px; flex-wrap: wrap; gap: 6px; }
+        .stat-line span:first-child { flex-shrink: 0; }
+        .stat-line span:last-child { flex: 1; text-align: right; word-wrap: break-word; word-break: break-all; }
+        .calc-line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 15px; flex-wrap: wrap; gap: 6px; }
+        .calc-line span:first-child { flex-shrink: 0; }
+        .calc-line span:last-child { flex: 1; text-align: right; word-wrap: break-word; word-break: break-all; }
+        .calc-value { color: #b89248; font-weight: 600; }
+        .trace-wrap { margin: 6px 0; padding: 6px 0; border-bottom: 1px solid #22272e; }
+        .trace-wrap:last-of-type { border-bottom: none; }
+        .trace-head { display: flex; gap: 8px; font-size: 14px; line-height: 1.5; margin-bottom: 4px; flex-wrap: wrap; }
+        .trace-good { color: #22c55e; font-weight: 600; flex-shrink: 0; }
+        .trace-warning { color: #f59e0b; font-weight: 600; flex-shrink: 0; }
+        .trace-expired { color: #f85149; font-weight: 600; flex-shrink: 0; }
+        .trace-head-text { flex: 1; word-wrap: break-word; word-break: break-all; }
+        .trace-pc-list { font-size: 14px; padding-left: 42px; line-height: 1.5; word-wrap: break-word; word-break: break-all; color: #c9d1d9; }
+        .trace-sub-title { font-size: 14px; margin: 6px 0 4px; color: #94a3b8; }
+        .color-desc { margin-top: 12px; padding-top: 8px; border-top: 1px solid #22272e; font-size: 13px; line-height: 1.6; }
         .desc-green { color: #22c55e; }
         .desc-yellow { color: #f59e0b; }
         .desc-red { color: #f85149; }
+        .stats-table { display: none; }
+        .bottom-clear { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+        .btn-clear-all { width: 100%; height: 44px; background-color: #da3633; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .btn-copy { width: 100%; height: 42px; background-color: #2563eb; color: white; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; -webkit-appearance: none; appearance: none; }
+        .btn-print { width: 100%; height: 42px; background-color: #10b981; color: white; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; -webkit-appearance: none; appearance: none; }
+        .btn-copy-full { width: 100%; height: 40px; background-color: #f97316; color: white; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; -webkit-appearance: none; appearance: none; }
+        .import-wrap { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .btn-toggle-import { width: 100%; height: 40px; background-color: #6366f1; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .import-box { display: none; flex-direction: column; gap: 8px; }
+        .import-textarea { width: 100%; min-height: 120px; padding: 10px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 14px; resize: vertical; }
+        .import-textarea:focus { outline: none; border-color: #58a6ff; }
+        .btn-load-import { width: 100%; height: 40px; background-color: #0ea5e9; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .confirm-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .confirm-box { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; width: 85%; max-width: 320px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .confirm-icon { font-size: 28px; text-align: center; margin-bottom: 6px; }
+        .confirm-title { font-size: 16px; font-weight: 600; color: #58a6ff; margin-bottom: 8px; text-align: center; }
+        .confirm-msg { font-size: 14px; color: #e6edf3; margin-bottom: 16px; line-height: 1.6; text-align: center; white-space: pre-line; }
+        .confirm-btns { display: flex; gap: 10px; }
+        .confirm-cancel { flex: 1; height: 40px; background: #444c56; color: #e6edf3; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .confirm-ok { flex: 1; height: 40px; background: #238636; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .confirm-ok.confirm-danger { background: #da3633; }
+        .confirm-ok.confirm-purple { background: #9333ea; }
+        .confirm-ok.confirm-blue { background: #2563eb; }
+        .confirm-ok.confirm-teal { background: #0891b2; }
+        .print-only { display: none; }
+        .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background-color: #238636; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; display: none; z-index: 999; }
 
-        .bottom-clear {
-            margin-top: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .btn-clear-all {
-            width: 100%;
-            height: 44px;
-            background-color: #da3633;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-copy {
-            width: 100%;
-            height: 42px;
-            background-color: #2563eb;
-            color: white;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-print {
-            width: 100%;
-            height: 42px;
-            background-color: #10b981;
-            color: white;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-copy-full {
-            width: 100%;
-            height: 40px;
-            background-color: #f97316;
-            color: white;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #238636;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            display: none;
-            z-index: 999;
-        }
-        .trace-sub-title{
-            font-size:14px;
-            margin:6px 0 4px;
-            color:#94a3b8;
-        }
-
-        html {
-            height: 100%;
-            background-color: #0d1117;
-        }
-
-        body {
-            width: 100%;
-            min-height: 100%;
-            max-width: 430px;
-        }
-
-        .container {
-            width: 100%;
-            padding-bottom: 24px;
-        }
-
-        .btn-del-row,
-        .btn-space,
-        .btn-submit,
-        .btn-add-row,
-        .btn-batch-all,
-        .btn-clear-all,
-        .btn-copy,
-        .btn-print,
-        .btn-toggle-import,
-        .btn-load-import,
-        .btn-copy-full,
-        .btn-pda-toggle,
-        .btn-pda-submit,
-        .pda-scan-undo,
-        .pda-m-del,
-        .pda-m-submit,
-        .btn-pda-add-row,
-        .btn-pda-batch,
-        .confirm-cancel,
-        .confirm-ok {
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        /* 彙總匯入區塊樣式 */
-        .import-wrap {
-            margin-top: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .btn-toggle-import {
-            width: 100%;
-            height: 40px;
-            background-color: #6366f1;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .import-box {
-            display: none;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .import-textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 10px;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            font-size: 14px;
-            resize: vertical;
-        }
-        .btn-load-import {
-            width: 100%;
-            height: 40px;
-            background-color: #0ea5e9;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* 原有 PDA掃碼工具 樣式（保持不變） */
-        .pda-wrap {
-            margin-bottom:12px;
-        }
-        .btn-pda-toggle {
-            width:100%;
-            height:42px;
-            background:#0891b2;
-            color:#fff;
-            border:none;
-            border-radius:6px;
-            font-size:14px;
-            font-weight:600;
-            cursor:pointer;
-        }
-        .pda-box {
-            display:none;
-            margin-top:8px;
-            background:#161b22;
-            border:1px solid #30363d;
-            border-radius:10px;
-            padding:12px;
-            flex-direction:column;
-            gap:8px;
-        }
-        .pda-input {
-            width:100%;
-            height:42px;
-            padding:0 10px;
-            background:#0d1117;
-            border:1px solid #30363d;
-            border-radius:6px;
-            color:#e6edf3;
-            font-size:15px;
-        }
-        .pda-textarea {
-            width:100%;
-            min-height:130px;
-            padding:10px;
-            background:#0d1117;
-            border:1px solid #30363d;
-            border-radius:6px;
-            color:#e6edf3;
-            font-size:14px;
-            resize:none;
-        }
-        .btn-pda-submit {
-            width:100%;
-            height:40px;
-            background:#22c55e;
-            color:#fff;
-            border:none;
-            border-radius:6px;
-            font-size:14px;
-            font-weight:600;
-            cursor:pointer;
-        }
-
-        /* ===== 新增功能樣式（追加，不改原有） ===== */
-
-        /* PDA掃碼狀態列：筆數 + 重複提示 + 回上一步 */
-        .pda-scan-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0 2px;
-        }
-        .pda-scan-count {
-            font-size: 14px;
-            color: #e6edf3;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .pda-scan-count strong {
-            color: #58a6ff;
-            font-size: 16px;
-        }
-        .pda-dup-info {
-            font-size: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .pda-dup-full {
-            color: #f85149;
-            font-weight: 600;
-        }
-        .pda-dup-partial {
-            color: #f59e0b;
-            font-weight: 600;
-        }
-        .pda-scan-undo {
-            height: 32px;
-            padding: 0 12px;
-            background: #da3633;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* PDA新增輸入列：迷你PDA框（只有料號+片數兩格） */
-        .pda-manual-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .pda-manual-row {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            position: relative;
-        }
-        .pda-m-row-title {
-            font-size: 13px;
-            color: #58a6ff;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-        .pda-m-part {
-            width: 100%;
-            height: 36px;
-            padding: 0 8px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            font-size: 14px;
-        }
-        .pda-m-part:focus {
-            outline: none;
-            border-color: #58a6ff;
-        }
-        .pda-m-qty {
-            width: 100%;
-            height: 36px;
-            padding: 0 8px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            font-size: 14px;
-        }
-        .pda-m-qty:focus {
-            outline: none;
-            border-color: #58a6ff;
-        }
-        .pda-m-del {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 24px;
-            height: 24px;
-            background: #da3633;
-            border: none;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .pda-m-submit {
-            width: 100%;
-            height: 34px;
-            background: #238636;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* PDA新增輸入列按鈕 */
-        .btn-pda-add-row {
-            width: 100%;
-            height: 38px;
-            background: #2563eb;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 4px;
-        }
-
-        /* PDA全部列一次送出按鈕 */
-        .btn-pda-batch {
-            width: 100%;
-            height: 40px;
-            background: #9333ea;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 4px;
-        }
-
-        /* 確認彈窗（暗色主題，匹配原有風格） */
-        .confirm-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .confirm-box {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            padding: 20px;
-            width: 85%;
-            max-width: 320px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        .confirm-icon {
-            font-size: 28px;
-            text-align: center;
-            margin-bottom: 6px;
-        }
-        .confirm-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #58a6ff;
-            margin-bottom: 8px;
-            text-align: center;
-        }
-        .confirm-msg {
-            font-size: 14px;
-            color: #e6edf3;
-            margin-bottom: 16px;
-            line-height: 1.6;
-            text-align: center;
-            white-space: pre-line;
-        }
-        .confirm-btns {
-            display: flex;
-            gap: 10px;
-        }
-        .confirm-cancel {
-            flex: 1;
-            height: 40px;
-            background: #444c56;
-            color: #e6edf3;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .confirm-ok {
-            flex: 1;
-            height: 40px;
-            background: #238636;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .confirm-ok.confirm-danger {
-            background: #da3633;
-        }
-        .confirm-ok.confirm-purple {
-            background: #9333ea;
-        }
-        .confirm-ok.confirm-blue {
-            background: #2563eb;
-        }
-        .confirm-ok.confirm-teal {
-            background: #0891b2;
-        }
-
-        /* 列印專用樣式（保持不變） */
+        /* 列印專用樣式 */
         @media print {
-            body, html {
-                background: #fff !important;
-            }
-            body * {
-                visibility: hidden;
-            }
-            #printArea, #printArea * {
-                visibility: visible;
-            }
-            #printArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: transparent !important;
-                color: #000 !important;
-                padding: 0 !important;
-                border: none !important;
-                border-radius: 0 !important;
-            }
-            #printArea .stats-panel {
-                background: transparent !important;
-                border: none !important;
-                padding: 0 !important;
-            }
-            #printArea .stat-group {
-                border-bottom: 1px #999 dashed !important;
-                padding: 8px 0 !important;
-            }
-            #printArea .trace-wrap {
-                border-bottom: 1px #999 solid !important;
-            }
-            #printArea .color-desc {
-                border-top: 1px #999 solid !important;
-            }
-            .trace-good { color: #16a34a !important; font-weight: bold; }
-            .trace-warning { color: #d97706 !important; font-weight: bold; }
-            .trace-expired { color: #dc2626 !important; font-weight: bold; }
-            .calc-value { color: #92400e !important; font-weight: bold; }
-            .trace-pc-list { color: #222 !important; }
-            .trace-sub-title { color: #333 !important; }
-            .import-wrap, .pda-wrap {
-                display: none !important;
-            }
+            .nav-bar { display: none !important; }
+            body, html { background: #fff !important; padding-top: 0 !important; padding-left: 0 !important; padding-right: 0 !important; }
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; background: transparent !important; color: #000 !important; padding: 6px !important; border: none !important; border-radius: 0 !important; }
+            #printArea .stats-panel { background: transparent !important; border: none !important; padding: 0 !important; }
+            #printArea .stats-normal { display: none !important; }
+            #printArea .stats-table { display: table !important; width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; }
+            #printArea .stats-table th, #printArea .stats-table td { border: 1px solid #555; padding: 2px 3px; text-align: left; vertical-align: top; font-size: 10px; color: #000 !important; line-height: 1.3; }
+            #printArea .stats-table th { background: #ddd !important; font-weight: bold; text-align: center; font-size: 10px; }
+            #printArea .color-desc { border-top: 1px #999 solid !important; font-size: 10px; color: #333 !important; margin-top: 6px; padding-top: 4px; }
+            #printArea .desc-green, #printArea .desc-yellow, #printArea .desc-red { color: #000 !important; }
+            .print-only { display: inline !important; color: #000 !important; font-weight: bold; }
+            .import-wrap, .pda-wrap, .manual-wrap, .bottom-clear, .nav-bar { display: none !important; }
         }
     </style>
 </head>
 <body>
+    <!-- 顶部导航栏 -->
+    <div class="nav-bar">
+        <span class="nav-title">PCB / 料件箱數統計系統</span>
+    </div>
+
     <div class="container">
-        <h1>PCB / 料件箱數統計系統</h1>
-
-        <!-- PDA掃碼工具（原有結構保留，內部擴充新功能） -->
+        <!-- PDA掃碼工具 -->
         <div class="pda-wrap">
-            <button class="btn-pda-toggle" onclick="app.togglePdaBox()">PDA掃碼工具</button>
+            <button class="btn-pda-toggle" id="btnPdaToggle">▼ PDA掃碼工具</button>
             <div class="pda-box" id="pdaBox">
-                <!-- 原有：棧號輸入 -->
                 <input class="pda-input" id="pdaStack" placeholder="輸入棧號">
-
-                <!-- 新增：筆數提示 + 重複提示 + 回上一步 -->
                 <div class="pda-scan-status">
                     <span class="pda-scan-count">
                         目前筆數：<strong id="pdaScanCount">0</strong>
                         <span class="pda-dup-info" id="pdaDupInfo"></span>
                     </span>
-                    <button class="pda-scan-undo" onclick="app.pdaScanUndo()">↩ 回上一步</button>
+                    <button class="pda-scan-undo" id="btnPdaUndo">↩ 回上一步</button>
                 </div>
-
-                <!-- 原有：掃碼textarea -->
-                <textarea class="pda-textarea" id="pdaScanText" placeholder="貼上PDA掃描條碼，每行一筆
-格式範例：料號-001|TR-252001|150||S0001"></textarea>
-
-                <!-- 原有：解析並匯入統計（改為需確認） -->
-                <button class="btn-pda-submit" onclick="app.confirmPdaParse()">解析並匯入統計</button>
-
-                <!-- 新增：新增輸入列按鈕（需確認） -->
-                <button class="btn-pda-add-row" onclick="app.confirmPdaAddRow()">➕ 新增輸入列</button>
-
-                <!-- 新增：手動輸入列區域（迷你PDA框，只有料號+片數兩格） -->
-                <div class="pda-manual-wrap" id="pdaManualWrap"></div>
-
-                <!-- 新增：全部列一次送出按鈕（需確認，只在有手動列時顯示） -->
-                <button class="btn-pda-batch" id="btnPdaBatch" onclick="app.confirmPdaBatchSubmit()" style="display:none;">🔹 全部列一次送出</button>
+                <textarea class="pda-textarea" id="pdaScanText" placeholder="貼上PDA掃描條碼，每行一筆&#10;格式範例：料號-001|TR-252001|150||S0001"></textarea>
+                <button class="btn-pda-submit" id="btnPdaParse">解析並匯入統計</button>
             </div>
         </div>
 
-        <!-- 原有手動輸入面板（完全不動） -->
-        <div class="input-panel">
-            <div id="rowsWrap">
-                <div class="input-row">
-                    <button class="btn-del-row" onclick="app.delRow(this)">×</button>
-                    <input type="text" class="stackInput" placeholder="棧號">
-                    <input type="text" class="partInput" placeholder="料號">
-                    <input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">
-                    <input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">
-                    <input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">
-                    <div class="row-btn-group">
-                        <button class="btn-space" onclick="app.insertSpace(this)">空白</button>
-                        <button class="btn-submit" onclick="app.submitData(this)">送出本筆</button>
+        <!-- 手動輸入工具 -->
+        <div class="manual-wrap">
+            <button class="btn-manual-toggle" id="btnManualToggle">▼ 手動輸入工具</button>
+            <div class="manual-box" id="manualBox">
+                <div class="input-panel">
+                    <div id="rowsWrap">
+                        <div class="input-row">
+                            <button class="btn-del-row" id="btnDelRow1">×</button>
+                            <input type="text" class="stackInput" placeholder="棧號">
+                            <input type="text" class="partInput" placeholder="料號">
+                            <input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">
+                            <input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">
+                            <input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">
+                            <div class="row-btn-group">
+                                <button class="btn-space" id="btnSpace1">空白</button>
+                                <button class="btn-submit" id="btnSubmit1">送出本筆</button>
+                            </div>
+                        </div>
                     </div>
+                    <button class="btn-add-row" id="btnAddRow">➕ 新增輸入列</button>
+                    <button class="btn-batch-all" id="btnBatchAll">🔹 全部列一次送出</button>
                 </div>
             </div>
-            <button class="btn-add-row" onclick="app.addRow()">➕ 新增輸入列</button>
-            <button class="btn-batch-all" onclick="app.batchSubmitAll()">🔹 全部列一次送出</button>
         </div>
 
-        <!-- 原有統計面板（完全不動） -->
+        <!-- 統計面板 -->
         <div id="printArea" class="stats-panel">
             <div class="stats-title">📊 整體統計結果</div>
-            <div id="mainStats"></div>
-
+            <div id="mainStats" class="stats-normal"></div>
+            <table id="printTable" class="stats-table"></table>
             <div class="color-desc">
                 <div><span class="desc-green">● 綠色</span>：可使用（剩餘到期超過30天）</div>
                 <div><span class="desc-yellow">● 黃色</span>：即將過期（剩餘到期30天內）</div>
@@ -817,71 +171,164 @@
             </div>
         </div>
 
-        <!-- 原有底部按鈕（完全不動） -->
+        <!-- 底部按鈕 -->
         <div class="bottom-clear">
-            <button class="btn-clear-all" onclick="app.clearAll()">重置</button>
-            <button class="btn-copy" onclick="app.copyResult()">複製規格化資料</button>
-            <button class="btn-print" onclick="app.printData()">列印統計內容</button>
+            <button class="btn-clear-all" id="btnClearAll">重置</button>
+            <button class="btn-copy" id="btnCopy">複製規格化資料</button>
+            <button class="btn-print" id="btnPrint">列印統計內容</button>
         </div>
 
-        <!-- 原有匯入區（完全不動） -->
+        <!-- 匯入區 -->
         <div class="import-wrap">
-            <button class="btn-copy-full" onclick="app.copyFullResult()">複製規格化完整資料</button>
-            <button class="btn-toggle-import" onclick="app.toggleImportBox()">展開/收合 匯入彙總規格CSV</button>
+            <button class="btn-copy-full" id="btnCopyFull">複製規格化完整資料</button>
+            <button class="btn-toggle-import" id="btnToggleImport">展開/收合 匯入彙總規格CSV</button>
             <div class="import-box" id="importBox">
                 <textarea class="import-textarea" id="importTextarea" placeholder="貼入複製的資料，包含完整明細的完整資料也可在此匯入還原"></textarea>
-                <button class="btn-load-import" onclick="app.loadImportData()">載入彙總資料</button>
+                <button class="btn-load-import" id="btnLoadImport">載入彙總資料</button>
             </div>
         </div>
     </div>
 
-    <!-- 新增：確認彈窗 -->
+    <!-- 確認彈窗 -->
     <div class="confirm-overlay" id="confirmOverlay">
         <div class="confirm-box">
             <div class="confirm-icon" id="confirmIcon">⚠️</div>
             <div class="confirm-title" id="confirmTitle">確認</div>
             <div class="confirm-msg" id="confirmMsg">確定要執行此操作嗎？</div>
             <div class="confirm-btns">
-                <button class="confirm-cancel" id="confirmCancelBtn" onclick="app.onConfirmCancel()">取消</button>
-                <button class="confirm-ok" id="confirmOkBtn" onclick="app.onConfirmOk()">確認</button>
+                <button class="confirm-cancel" id="confirmCancelBtn">取消</button>
+                <button class="confirm-ok" id="confirmOkBtn">確認</button>
             </div>
         </div>
     </div>
 
-    <!-- 原有Toast（完全不動） -->
+    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <script>
-        /* 原有工具函數（完全不動） */
+        /* ===== 工具函數：ISO週日期計算 ===== */
         function getISOWeekDates(year, week) {
             const simple = new Date(year, 0, 1 + (week - 1) * 7);
             const dayOfWeek = simple.getDay();
             const ISOweekStart = new Date(simple);
-            if(dayOfWeek <= 4) ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
-            else ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+            if (dayOfWeek <= 4) {
+                ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+            } else {
+                ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+            }
             return ISOweekStart;
         }
+
+        /* ===== 工具函數：日期格式化 ===== */
         function formatDate(date) {
-            return `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')}`;
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return y + '/' + m + '/' + d;
         }
 
+        /* ===== 主應用邏輯 ===== */
         const app = {
-            /* 原有屬性（保留） */
-            rowsWrap: document.getElementById('rowsWrap'),
-            mainStatsEl: document.getElementById('mainStats'),
-            toastEl: document.getElementById('toast'),
+            /* 屬性：DOM元素引用 */
+            rowsWrap: null,
+            mainStatsEl: null,
+            toastEl: null,
+
+            /* 屬性：統計資料 */
             groupData: [],
 
-            /* 新增屬性：確認彈窗回呼 */
+            /* 屬性：確認彈窗回呼 */
             _confirmCallback: null,
 
-            /* ===== 原有方法（完全不動） ===== */
+            /* ===== 初始化方法 ===== */
+            init() {
+                /* 獲取DOM元素引用 */
+                this.rowsWrap = document.getElementById('rowsWrap');
+                this.mainStatsEl = document.getElementById('mainStats');
+                this.toastEl = document.getElementById('toast');
 
-            togglePdaBox(){
-                const box = document.getElementById('pdaBox');
-                box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+                /* 綁定PDA掃碼按鈕事件 */
+                document.getElementById('btnPdaToggle').addEventListener('click', function() { app.togglePdaBox(); });
+                document.getElementById('btnPdaUndo').addEventListener('click', function() { app.pdaScanUndo(); });
+                document.getElementById('btnPdaParse').addEventListener('click', function() { app.confirmPdaParse(); });
+
+                /* 綁定手動輸入工具按鈕事件 */
+                document.getElementById('btnManualToggle').addEventListener('click', function() { app.toggleManualBox(); });
+
+                /* 綁定手動輸入面板按鈕事件 */
+                document.getElementById('btnAddRow').addEventListener('click', function() { app.addRow(); });
+                document.getElementById('btnBatchAll').addEventListener('click', function() { app.batchSubmitAll(); });
+
+                /* 綁定第一行按鈕事件 */
+                document.getElementById('btnDelRow1').addEventListener('click', function() { app.delRow(this); });
+                document.getElementById('btnSpace1').addEventListener('click', function() { app.insertSpace(this); });
+                document.getElementById('btnSubmit1').addEventListener('click', function() { app.submitData(this); });
+
+                /* 綁定底部按鈕事件 */
+                document.getElementById('btnClearAll').addEventListener('click', function() { app.clearAll(); });
+                document.getElementById('btnCopy').addEventListener('click', function() { app.copyResult(); });
+                document.getElementById('btnPrint').addEventListener('click', function() { app.printData(); });
+                document.getElementById('btnCopyFull').addEventListener('click', function() { app.copyFullResult(); });
+                document.getElementById('btnToggleImport').addEventListener('click', function() { app.toggleImportBox(); });
+                document.getElementById('btnLoadImport').addEventListener('click', function() { app.loadImportData(); });
+
+                /* 綁定確認彈窗按鈕事件 */
+                document.getElementById('confirmCancelBtn').addEventListener('click', function() { app.onConfirmCancel(); });
+                document.getElementById('confirmOkBtn').addEventListener('click', function() { app.onConfirmOk(); });
+
+                /* PDA掃碼textarea即時更新筆數 */
+                document.getElementById('pdaScanText').addEventListener('input', function() {
+                    app.pdaScanCountUpdate();
+                });
+
+                /* 確認彈窗點擊遮罩關閉 */
+                document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        app.hideConfirmModal();
+                    }
+                });
+
+                /* Enter鍵快捷送出 */
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        const lastBtn = document.querySelector('.input-row:last-child .btn-submit');
+                        if (lastBtn) {
+                            lastBtn.click();
+                        }
+                    }
+                });
+
+                /* 初始渲染（空統計） */
+                this.calcAll();
             },
 
+            /* ===== PDA掃碼工具：展開/閉合 ===== */
+            togglePdaBox() {
+                const box = document.getElementById('pdaBox');
+                const btn = document.getElementById('btnPdaToggle');
+                if (box.style.display === 'flex') {
+                    box.style.display = 'none';
+                    btn.textContent = '▼ PDA掃碼工具';
+                } else {
+                    box.style.display = 'flex';
+                    btn.textContent = '▲ PDA掃碼工具';
+                }
+            },
+
+            /* ===== 手動輸入工具：展開/閉合 ===== */
+            toggleManualBox() {
+                const box = document.getElementById('manualBox');
+                const btn = document.getElementById('btnManualToggle');
+                if (box.style.display === 'block') {
+                    box.style.display = 'none';
+                    btn.textContent = '▼ 手動輸入工具';
+                } else {
+                    box.style.display = 'block';
+                    btn.textContent = '▲ 手動輸入工具';
+                }
+            },
+
+            /* ===== 手動輸入：空白鍵插入 ===== */
             insertSpace(btn) {
                 const row = btn.closest('.input-row');
                 const qtyInput = row.querySelector('.qtyInput');
@@ -893,29 +340,34 @@
                 qtyInput.focus();
             },
 
+            /* ===== 片數解析：多數值用空白分隔 ===== */
             parseQtyList(val) {
-                const numArr = val.trim().split(/\s+/).map(n => parseInt(n) || 0).filter(n => n > 0);
+                const numArr = val.trim().split(/\s+/).map(function(n) { return parseInt(n) || 0; }).filter(function(n) { return n > 0; });
                 return numArr;
             },
 
+            /* ===== 手動輸入：新增列 ===== */
             addRow() {
                 const row = document.createElement('div');
                 row.className = 'input-row';
-                row.innerHTML = `
-                    <button class="btn-del-row" onclick="app.delRow(this)">×</button>
-                    <input type="text" class="stackInput" placeholder="棧號">
-                    <input type="text" class="partInput" placeholder="料號">
-                    <input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">
-                    <input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">
-                    <input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">
-                    <div class="row-btn-group">
-                        <button class="btn-space" onclick="app.insertSpace(this)">空白</button>
-                        <button class="btn-submit" onclick="app.submitData(this)">送出本筆</button>
-                    </div>
-                `;
+                row.innerHTML = '<button class="btn-del-row">×</button>' +
+                    '<input type="text" class="stackInput" placeholder="棧號">' +
+                    '<input type="text" class="partInput" placeholder="料號">' +
+                    '<input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">' +
+                    '<input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">' +
+                    '<input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">' +
+                    '<div class="row-btn-group">' +
+                    '<button class="btn-space">空白</button>' +
+                    '<button class="btn-submit">送出本筆</button>' +
+                    '</div>';
+                /* 綁定新列按鈕事件 */
+                row.querySelector('.btn-del-row').addEventListener('click', function() { app.delRow(this); });
+                row.querySelector('.btn-space').addEventListener('click', function() { app.insertSpace(this); });
+                row.querySelector('.btn-submit').addEventListener('click', function() { app.submitData(this); });
                 this.rowsWrap.appendChild(row);
             },
 
+            /* ===== 手動輸入：刪除列 ===== */
             delRow(btn) {
                 const allRows = this.rowsWrap.querySelectorAll('.input-row');
                 if (allRows.length <= 1) {
@@ -925,6 +377,7 @@
                 btn.closest('.input-row').remove();
             },
 
+            /* ===== 手動輸入：送出本筆 ===== */
             submitData(btn) {
                 const row = btn.closest('.input-row');
                 const stackEl = row.querySelector('.stackInput');
@@ -945,7 +398,7 @@
                 }
 
                 const groupKey = stack + '|' + part;
-                let targetGroup = this.groupData.find(g => g.key === groupKey);
+                let targetGroup = this.groupData.find(function(g) { return g.key === groupKey; });
 
                 if (!targetGroup) {
                     targetGroup = {
@@ -963,14 +416,14 @@
                 let inputPcArr = [];
                 if (qtyList.length === 1) {
                     const qty = qtyList[0];
-                    for(let i=0; i < boxCount; i++){
+                    for (let i = 0; i < boxCount; i++) {
                         inputPcArr.push(qty);
                         targetGroup.totalQty += qty;
                         targetGroup.totalBox += 1;
                         targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
                     }
                 } else {
-                    qtyList.forEach(qty => {
+                    qtyList.forEach(function(qty) {
                         inputPcArr.push(qty);
                         targetGroup.totalQty += qty;
                         targetGroup.totalBox += 1;
@@ -978,12 +431,12 @@
                     });
                 }
 
-                if(trace){
-                    if(!targetGroup.traceMap[trace]){
-                        targetGroup.traceMap[trace] = {totalPc:0, boxNum:0, pcList:[]};
+                if (trace) {
+                    if (!targetGroup.traceMap[trace]) {
+                        targetGroup.traceMap[trace] = { totalPc: 0, boxNum: 0, pcList: [] };
                     }
                     const traceItem = targetGroup.traceMap[trace];
-                    traceItem.totalPc += inputPcArr.reduce((a,b)=>a+b,0);
+                    traceItem.totalPc += inputPcArr.reduce(function(a, b) { return a + b; }, 0);
                     traceItem.boxNum += inputPcArr.length;
                     traceItem.pcList = traceItem.pcList.concat(inputPcArr);
                 }
@@ -997,11 +450,12 @@
                 this.calcAll();
             },
 
+            /* ===== 手動輸入：全部列一次送出 ===== */
             batchSubmitAll() {
                 const allRows = this.rowsWrap.querySelectorAll('.input-row');
                 let hasValid = false;
 
-                allRows.forEach(row => {
+                allRows.forEach(function(row) {
                     const stackEl = row.querySelector('.stackInput');
                     const partEl = row.querySelector('.partInput');
                     const traceEl = row.querySelector('.traceInput');
@@ -1011,14 +465,16 @@
                     const stack = stackEl.value.trim();
                     const part = partEl.value.trim();
                     const trace = traceEl.value.trim();
-                    const qtyList = this.parseQtyList(qtyEl.value);
+                    const qtyList = app.parseQtyList(qtyEl.value);
                     const boxCount = parseInt(boxEl.value) || 1;
 
-                    if (qtyList.length === 0) return;
+                    if (qtyList.length === 0) {
+                        return;
+                    }
                     hasValid = true;
 
                     const groupKey = stack + '|' + part;
-                    let targetGroup = this.groupData.find(g => g.key === groupKey);
+                    let targetGroup = app.groupData.find(function(g) { return g.key === groupKey; });
                     if (!targetGroup) {
                         targetGroup = {
                             key: groupKey,
@@ -1029,20 +485,20 @@
                             qtyBoxMap: {},
                             traceMap: {}
                         };
-                        this.groupData.push(targetGroup);
+                        app.groupData.push(targetGroup);
                     }
 
                     let inputPcArr = [];
                     if (qtyList.length === 1) {
                         const qty = qtyList[0];
-                        for(let i=0; i < boxCount; i++){
+                        for (let i = 0; i < boxCount; i++) {
                             inputPcArr.push(qty);
                             targetGroup.totalQty += qty;
                             targetGroup.totalBox += 1;
                             targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
                         }
                     } else {
-                        qtyList.forEach(qty => {
+                        qtyList.forEach(function(qty) {
                             inputPcArr.push(qty);
                             targetGroup.totalQty += qty;
                             targetGroup.totalBox += 1;
@@ -1050,12 +506,12 @@
                         });
                     }
 
-                    if(trace){
-                        if(!targetGroup.traceMap[trace]){
-                            targetGroup.traceMap[trace] = {totalPc:0, boxNum:0, pcList:[]};
+                    if (trace) {
+                        if (!targetGroup.traceMap[trace]) {
+                            targetGroup.traceMap[trace] = { totalPc: 0, boxNum: 0, pcList: [] };
                         }
                         const traceItem = targetGroup.traceMap[trace];
-                        traceItem.totalPc += inputPcArr.reduce((a,b)=>a+b,0);
+                        traceItem.totalPc += inputPcArr.reduce(function(a, b) { return a + b; }, 0);
                         traceItem.boxNum += inputPcArr.length;
                         traceItem.pcList = traceItem.pcList.concat(inputPcArr);
                     }
@@ -1075,167 +531,328 @@
                 this.calcAll();
             },
 
+            /* ===== 重置：使用自定義確認彈窗 ===== */
             clearAll() {
-                if (!confirm('確定要清空所有資料嗎？')) return;
+                this.showConfirmModal({
+                    icon: '🗑️',
+                    title: '重置確認',
+                    msg: '確定要清空所有資料嗎？\n此操作無法撤銷。',
+                    confirmText: '重置',
+                    confirmClass: 'confirm-danger',
+                    onConfirm: function() { app.clearAllInternal(); }
+                });
+            },
+
+            /* ===== 重置內部執行 ===== */
+            clearAllInternal() {
                 this.groupData = [];
-                this.rowsWrap.innerHTML = `
-                    <div class="input-row">
-                        <button class="btn-del-row" onclick="app.delRow(this)">×</button>
-                        <input type="text" class="stackInput" placeholder="棧號">
-                        <input type="text" class="partInput" placeholder="料號">
-                        <input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">
-                        <input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">
-                        <input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">
-                        <div class="row-btn-group">
-                            <button class="btn-space" onclick="app.insertSpace(this)">空白</button>
-                            <button class="btn-submit" onclick="app.submitData(this)">送出本筆</button>
-                        </div>
-                    </div>
-                `;
-                /* 新增：同時重置PDA手動輸入列和掃碼區 */
-                this.resetPdaManualWrap();
+                this.rowsWrap.innerHTML = '<div class="input-row">' +
+                    '<button class="btn-del-row">×</button>' +
+                    '<input type="text" class="stackInput" placeholder="棧號">' +
+                    '<input type="text" class="partInput" placeholder="料號">' +
+                    '<input type="text" inputmode="numeric" class="traceInput" placeholder="TRACE ID">' +
+                    '<input type="text" inputmode="numeric" class="qtyInput" placeholder="片數(多數值按空白鍵分隔，每個數字=1箱)">' +
+                    '<input type="tel" class="boxInput" placeholder="箱數（預設1，多數值時自動忽略）">' +
+                    '<div class="row-btn-group">' +
+                    '<button class="btn-space">空白</button>' +
+                    '<button class="btn-submit">送出本筆</button>' +
+                    '</div>' +
+                    '</div>';
+                /* 重新綁定第一行按鈕事件 */
+                const firstRow = this.rowsWrap.querySelector('.input-row');
+                firstRow.querySelector('.btn-del-row').addEventListener('click', function() { app.delRow(this); });
+                firstRow.querySelector('.btn-space').addEventListener('click', function() { app.insertSpace(this); });
+                firstRow.querySelector('.btn-submit').addEventListener('click', function() { app.submitData(this); });
+
+                /* 重置PDA掃碼區 */
                 document.getElementById('pdaScanText').value = '';
                 this.pdaScanCountUpdate();
                 this.calcAll();
                 this.showToast('已重置');
             },
 
+            /* ===== 計算並渲染統計 ===== */
             calcAll() {
                 this.renderMainStats();
+                this.renderPrintTable();
             },
 
+            /* ===== 渲染整體統計結果（正常視圖） ===== */
             renderMainStats() {
                 let html = '';
-                this.groupData.forEach(group => {
-                    const calcParts = Object.entries(group.qtyBoxMap).map(([q,b])=>`${q}×${b}`).join('+');
-                    
-                    html += `
-                        <div class="stat-group">
-                            <div class="stat-line"><span>棧號</span><span>${group.stack}</span></div>
-                            <div class="stat-line"><span>料號</span><span>${group.part}</span></div>
-                            <div class="stat-line"><span>總箱數</span><span>${group.totalBox}</span></div>
-                            <div class="stat-line"><span>總片數</span><span>${group.totalQty}</span></div>
-                            <div class="calc-line">
-                                <span>計算方式</span>
-                                <span>${calcParts}=<span class="calc-value">${group.totalQty}</span></span>
-                            </div>
-                    `;
+                if (this.groupData.length === 0) {
+                    html = '<div style="text-align:center;color:#6e7681;padding:20px 0;font-size:14px;">尚無統計資料，請先輸入或匯入資料</div>';
+                    this.mainStatsEl.innerHTML = html;
+                    return;
+                }
 
-                    if(Object.keys(group.traceMap).length > 0){
-                        html += `<div class="trace-sub-title">🔍 本組 TRACE ID</div>`;
-                        Object.entries(group.traceMap).forEach(([dc, traceData]) => {
-                            const cls = this.getTraceColor(dc);
-                            const prodDate = this.getSingleDate(dc);
-                            const sortedPcList = [...traceData.pcList].sort((a,b) => a - b);
+                this.groupData.forEach(function(group) {
+                    const calcParts = Object.entries(group.qtyBoxMap).map(function(e) { return e[0] + '×' + e[1]; }).join('+');
+
+                    html += '<div class="stat-group">' +
+                        '<div class="stat-line"><span>棧號</span><span>' + group.stack + '</span></div>' +
+                        '<div class="stat-line"><span>料號</span><span>' + group.part + '</span></div>' +
+                        '<div class="stat-line"><span>總箱數</span><span>' + group.totalBox + '</span></div>' +
+                        '<div class="stat-line"><span>總片數</span><span>' + group.totalQty + '</span></div>' +
+                        '<div class="calc-line"><span>計算方式</span><span>' + calcParts + '=<span class="calc-value">' + group.totalQty + '</span></span></div>';
+
+                    if (Object.keys(group.traceMap).length > 0) {
+                        html += '<div class="trace-sub-title">🔍 本組 TRACE ID</div>';
+                        Object.entries(group.traceMap).forEach(function(entry) {
+                            const dc = entry[0];
+                            const traceData = entry[1];
+                            const cls = app.getTraceColor(dc);
+                            const prodDate = app.getSingleDate(dc);
+                            const diffDays = app.getTraceDiffDays(dc);
+                            const sortedPcList = [].concat(traceData.pcList).sort(function(a, b) { return a - b; });
                             const pcStr = sortedPcList.join('/');
-                            const headText = `${traceData.totalPc}片（${traceData.boxNum}箱）DC：${prodDate}`;
-                            html += `
-                                <div class="trace-wrap">
-                                    <div class="trace-head">
-                                        <span class="${cls}">${dc}</span>
-                                        <span class="trace-head-text">${headText}</span>
-                                    </div>
-                                    <div class="trace-pc-list">${pcStr}</div>
-                                </div>
-                            `;
+                            const headText = traceData.totalPc + '片（' + traceData.boxNum + '箱）DC：' + prodDate;
+
+                            /* 列印專用：剩餘天數文字（只在列印時顯示） */
+                            let printOnlyText = '';
+                            if (diffDays > 30) {
+                                printOnlyText = '可使用(剩' + diffDays + '天)';
+                            } else if (diffDays > 0) {
+                                printOnlyText = '即將過期(剩' + diffDays + '天)';
+                            } else if (diffDays === 0) {
+                                printOnlyText = '今天到期';
+                            } else {
+                                printOnlyText = '已過期(過期' + Math.abs(diffDays) + '天)';
+                            }
+
+                            html += '<div class="trace-wrap">' +
+                                '<div class="trace-head">' +
+                                '<span class="' + cls + '">' + dc + '</span>' +
+                                '<span class="trace-head-text">' + headText + '</span>' +
+                                '<span class="print-only"> — ' + printOnlyText + '</span>' +
+                                '</div>' +
+                                '<div class="trace-pc-list">' + pcStr + '</div>' +
+                                '</div>';
                         });
                     }
-                    html += `</div>`;
+                    html += '</div>';
                 });
                 this.mainStatsEl.innerHTML = html;
             },
 
+            /* ===== 渲染列印表格（列印專用） ===== */
+            renderPrintTable() {
+                const tableEl = document.getElementById('printTable');
+                if (this.groupData.length === 0) {
+                    tableEl.innerHTML = '';
+                    return;
+                }
+
+                let html = '<thead><tr>' +
+                    '<th>棧號</th>' +
+                    '<th>料號</th>' +
+                    '<th>箱數</th>' +
+                    '<th>片數</th>' +
+                    '<th>計算方式</th>' +
+                    '<th>TRACE ID</th>' +
+                    '<th>DC/狀態</th>' +
+                    '<th>片數明細</th>' +
+                    '</tr></thead><tbody>';
+
+                this.groupData.forEach(function(group) {
+                    const calcParts = Object.entries(group.qtyBoxMap).map(function(e) { return e[0] + '×' + e[1]; }).join('+');
+                    const traceKeys = Object.keys(group.traceMap);
+
+                    if (traceKeys.length === 0) {
+                        /* 無TRACE ID的組 */
+                        html += '<tr>' +
+                            '<td>' + group.stack + '</td>' +
+                            '<td>' + group.part + '</td>' +
+                            '<td>' + group.totalBox + '</td>' +
+                            '<td>' + group.totalQty + '</td>' +
+                            '<td>' + calcParts + '</td>' +
+                            '<td>-</td>' +
+                            '<td>-</td>' +
+                            '<td>-</td>' +
+                            '</tr>';
+                    } else {
+                        /* 有TRACE ID的組，使用rowspan合併組級欄位 */
+                        const rowSpan = traceKeys.length;
+                        traceKeys.forEach(function(dc, idx) {
+                            const traceData = group.traceMap[dc];
+                            const prodDate = app.getSingleDate(dc);
+                            const diffDays = app.getTraceDiffDays(dc);
+
+                            /* 狀態文字（含剩餘天數） */
+                            let statusText = '';
+                            if (diffDays > 30) {
+                                statusText = '可使用(剩' + diffDays + '天)';
+                            } else if (diffDays > 0) {
+                                statusText = '即將過期(剩' + diffDays + '天)';
+                            } else if (diffDays === 0) {
+                                statusText = '今天到期';
+                            } else {
+                                statusText = '已過期(過期' + Math.abs(diffDays) + '天)';
+                            }
+
+                            const sortedPcList = [].concat(traceData.pcList).sort(function(a, b) { return a - b; });
+                            const pcStr = sortedPcList.join('/');
+                            const detailStr = traceData.totalPc + '片(' + traceData.boxNum + '箱) ' + pcStr;
+
+                            html += '<tr>';
+                            /* 第一行才輸出組級欄位（帶rowspan） */
+                            if (idx === 0) {
+                                html += '<td rowspan="' + rowSpan + '">' + group.stack + '</td>' +
+                                    '<td rowspan="' + rowSpan + '">' + group.part + '</td>' +
+                                    '<td rowspan="' + rowSpan + '">' + group.totalBox + '</td>' +
+                                    '<td rowspan="' + rowSpan + '">' + group.totalQty + '</td>' +
+                                    '<td rowspan="' + rowSpan + '">' + calcParts + '</td>';
+                            }
+                            /* TRACE級欄位 */
+                            html += '<td>' + dc + '</td>' +
+                                '<td>' + prodDate + ' ' + statusText + '</td>' +
+                                '<td>' + detailStr + '</td>' +
+                                '</tr>';
+                        });
+                    }
+                });
+
+                html += '</tbody>';
+                tableEl.innerHTML = html;
+            },
+
+            /* ===== TRACE ID顏色判定 ===== */
             getTraceColor(traceId) {
-                const id = String(traceId);
-                const year = 2000 + parseInt(id.substring(0,2));
-                const week = parseInt(id.substring(2,4));
-                const productionStart = getISOWeekDates(year, week);
-                const expireStart = getISOWeekDates(year + 1, week);
-                const today = new Date();
-                const diffDay = Math.floor((expireStart - today) / (1000 * 60 * 60 * 24));
-
-                if (diffDay < 0) return 'trace-expired';
-                else if (diffDay <= 30) return 'trace-warning';
-                else return 'trace-good';
+                const diffDay = this.getTraceDiffDays(traceId);
+                if (diffDay < 0) {
+                    return 'trace-expired';
+                } else if (diffDay <= 30) {
+                    return 'trace-warning';
+                } else {
+                    return 'trace-good';
+                }
             },
 
+            /* ===== TRACE ID剩餘天數計算 ===== */
+            getTraceDiffDays(traceId) {
+                try {
+                    const id = String(traceId);
+                    const year = 2000 + parseInt(id.substring(0, 2));
+                    const week = parseInt(id.substring(2, 4));
+                    const expireStart = getISOWeekDates(year + 1, week);
+                    const today = new Date();
+                    const diffDay = Math.floor((expireStart - today) / (1000 * 60 * 60 * 24));
+                    return diffDay;
+                } catch (e) {
+                    console.error('getTraceDiffDays error:', e, traceId);
+                    return 999;
+                }
+            },
+
+            /* ===== TRACE ID生產日期 ===== */
             getSingleDate(traceId) {
-                const id = String(traceId);
-                const year = 2000 + parseInt(id.substring(0,2));
-                const week = parseInt(id.substring(2,4));
-                const startDate = getISOWeekDates(year, week);
-                return formatDate(startDate);
+                try {
+                    const id = String(traceId);
+                    const year = 2000 + parseInt(id.substring(0, 2));
+                    const week = parseInt(id.substring(2, 4));
+                    const startDate = getISOWeekDates(year, week);
+                    return formatDate(startDate);
+                } catch (e) {
+                    console.error('getSingleDate error:', e, traceId);
+                    return '未知';
+                }
             },
 
-            /* 原有壓縮匯出（維持不變） */
+            /* ===== 複製規格化資料 ===== */
             copyResult() {
-                if(this.groupData.length === 0){
+                if (this.groupData.length === 0) {
                     this.showToast('尚無資料可複製');
                     return;
                 }
 
                 let copyLines = [];
-                this.groupData.forEach(group => {
-                    const calcFormula = Object.entries(group.qtyBoxMap).map(([q,b])=>`${q}×${b}`).join('+');
+                this.groupData.forEach(function(group) {
+                    const calcFormula = Object.entries(group.qtyBoxMap).map(function(e) { return e[0] + '×' + e[1]; }).join('+');
                     const traceList = Object.keys(group.traceMap);
-                    const dataCodeStr = Object.entries(group.traceMap).map(([k,v])=>`${k}*${v.totalPc}`).join('/');
+                    const dataCodeStr = Object.entries(group.traceMap).map(function(e) { return e[0] + '*' + e[1].totalPc; }).join('/');
 
                     let minTrace = traceList[0] || '';
-                    traceList.forEach(t=>{
-                        if(Number(t) < Number(minTrace)) minTrace = t;
+                    traceList.forEach(function(t) {
+                        if (Number(t) < Number(minTrace)) {
+                            minTrace = t;
+                        }
                     });
-                    const dateStr = minTrace ? this.getSingleDate(minTrace) : '';
+                    const dateStr = minTrace ? app.getSingleDate(minTrace) : '';
 
-                    const line = `${group.stack},${group.part},${calcFormula},${group.totalQty},${group.totalBox},${dataCodeStr},${dateStr}`;
+                    const line = group.stack + ',' + group.part + ',' + calcFormula + ',' + group.totalQty + ',' + group.totalBox + ',' + dataCodeStr + ',' + dateStr;
                     copyLines.push(line);
                 });
 
                 const resultStr = copyLines.join('\n');
 
-                navigator.clipboard.writeText(resultStr).then(()=>{
-                    this.showToast('複製成功！');
-                }).catch(()=>{
-                    const textarea = document.createElement('textarea');
-                    textarea.value = resultStr;
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    this.showToast('複製成功！');
-                });
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(resultStr).then(function() {
+                        app.showToast('複製成功！');
+                    }).catch(function() {
+                        app.fallbackCopy(resultStr);
+                    });
+                } else {
+                    this.fallbackCopy(resultStr);
+                }
             },
 
-            /* 新增：完整明細匯出（維持不變） */
+            /* ===== 剪貼簿備案複製 ===== */
+            fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    this.showToast('複製成功！');
+                } catch (e) {
+                    console.error('fallbackCopy error:', e);
+                    this.showToast('複製失敗，請手動複製');
+                }
+                document.body.removeChild(textarea);
+            },
+
+            /* ===== 複製完整明細JSON ===== */
             copyFullResult() {
+                if (this.groupData.length === 0) {
+                    this.showToast('尚無資料可複製');
+                    return;
+                }
                 const jsonStr = JSON.stringify(this.groupData, null, 2);
-                navigator.clipboard.writeText(jsonStr).then(()=>{
-                    this.showToast('完整規格資料已複製，可在下方匯入框還原全部明細');
-                }).catch(()=>{
-                    const ta = document.createElement('textarea');
-                    ta.value = jsonStr;
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                    this.showToast('完整規格資料已複製');
-                });
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(jsonStr).then(function() {
+                        app.showToast('完整規格資料已複製，可在下方匯入框還原全部明細');
+                    }).catch(function() {
+                        app.fallbackCopy(jsonStr);
+                    });
+                } else {
+                    this.fallbackCopy(jsonStr);
+                }
             },
 
+            /* ===== 列印 ===== */
             printData() {
                 window.print();
             },
 
+            /* ===== Toast提示 ===== */
             showToast(msg) {
                 this.toastEl.textContent = msg;
                 this.toastEl.style.display = 'block';
-                setTimeout(()=>this.toastEl.style.display='none', 1800);
+                setTimeout(function() {
+                    app.toastEl.style.display = 'none';
+                }, 1800);
             },
 
+            /* ===== 匯入區展開/收合 ===== */
             toggleImportBox() {
                 const box = document.getElementById('importBox');
                 box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
             },
 
+            /* ===== 載入匯入資料 ===== */
             loadImportData() {
                 const text = document.getElementById('importTextarea').value.trim();
                 if (!text) {
@@ -1243,6 +860,7 @@
                     return;
                 }
 
+                /* 嘗試解析JSON（完整明細還原） */
                 if (text.trim().startsWith('[')) {
                     try {
                         const restore = JSON.parse(text);
@@ -1252,27 +870,36 @@
                             this.showToast('完整資料匯入成功，所有箱數、箱片序列已還原');
                             return;
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                    }
                 }
 
-                const lines = text.split('\n').filter(line => line.trim() !== '');
+                /* 解析CSV格式 */
+                const lines = text.split('\n').filter(function(line) { return line.trim() !== ''; });
                 const newGroupData = [];
 
-                for (const line of lines) {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
                     const cols = line.split(',');
                     if (cols.length < 7) {
-                        this.showToast(`格式錯誤，行：${line}`);
+                        this.showToast('格式錯誤，行：' + line.substring(0, 30));
                         return;
                     }
-                    const [stack, part, calcStr, totalQty, totalBox, traceCombine] = cols;
+                    const stack = cols[0];
+                    const part = cols[1];
+                    const calcStr = cols[2];
+                    const totalQty = cols[3];
+                    const totalBox = cols[4];
+                    const traceCombine = cols[5];
 
-                    const traceItems = traceCombine.split('/').map(item => {
-                        const [dc, pc] = item.split('*');
-                        return { dc: dc.trim(), totalPc: Number(pc) || 0 };
+                    const traceItems = traceCombine.split('/').map(function(item) {
+                        const parts = item.split('*');
+                        return { dc: parts[0].trim(), totalPc: Number(parts[1]) || 0 };
                     });
 
                     const traceMap = {};
-                    traceItems.forEach(t => {
+                    traceItems.forEach(function(t) {
                         traceMap[t.dc] = {
                             totalPc: t.totalPc,
                             boxNum: 0,
@@ -1282,7 +909,7 @@
 
                     const qtyBoxMap = {};
                     const calcParts = calcStr.split('+');
-                    calcParts.forEach(part => {
+                    calcParts.forEach(function(part) {
                         const match = part.match(/^(\d+)×(\d+)$/);
                         if (match) {
                             const q = match[1];
@@ -1292,13 +919,13 @@
                     });
 
                     newGroupData.push({
-                        key: `${stack}|${part}`,
+                        key: stack.trim() + '|' + part.trim(),
                         stack: stack.trim(),
                         part: part.trim(),
                         totalQty: Number(totalQty) || 0,
                         totalBox: Number(totalBox) || 0,
-                        qtyBoxMap,
-                        traceMap
+                        qtyBoxMap: qtyBoxMap,
+                        traceMap: traceMap
                     });
                 }
 
@@ -1307,8 +934,7 @@
                 this.showToast('彙總資料匯入完成（明細數據無法還原）');
             },
 
-            /* ===== 新增方法：確認彈窗系統 ===== */
-
+            /* ===== 確認彈窗系統 ===== */
             showConfirmModal(options) {
                 /* options: { icon, title, msg, confirmText, confirmClass, onConfirm } */
                 const overlay = document.getElementById('confirmOverlay');
@@ -1341,83 +967,77 @@
                 this.hideConfirmModal();
             },
 
-            /* ===== 新增方法：PDA掃碼即時筆數與重複檢測 ===== */
-
-            /* 解析textarea中每一行，提取料號/片數/TRACE ID/流水號 */
+            /* ===== PDA掃碼：解析單行 ===== */
             pdaParseLine(raw) {
-                const arr = raw.split('|');
-                if (arr.length < 5) return null;
-                const matFull = arr[0].trim();
-                const traceFull = arr[1].trim();
-                const qtyStr = arr[2].trim();
-                const serialNo = arr[4] ? arr[4].trim() : '';
-                const matSplit = matFull.lastIndexOf('-');
-                const traceSplit = traceFull.lastIndexOf('-');
-                if (matSplit === -1 || traceSplit === -1 || isNaN(Number(qtyStr))) return null;
-                const part = matFull.substring(0, matSplit);
-                const traceId = traceFull.substring(traceSplit + 1);
-                const qty = Number(qtyStr);
-                return { part: part, qty: qty, traceId: traceId, serialNo: serialNo };
+                try {
+                    const arr = raw.split('|');
+                    if (arr.length < 5) {
+                        return null;
+                    }
+                    const matFull = arr[0].trim();
+                    const traceFull = arr[1].trim();
+                    const qtyStr = arr[2].trim();
+                    const serialNo = arr[4] ? arr[4].trim() : '';
+
+                    const matSplit = matFull.lastIndexOf('-');
+                    const traceSplit = traceFull.lastIndexOf('-');
+                    if (matSplit === -1 || traceSplit === -1 || isNaN(Number(qtyStr))) {
+                        return null;
+                    }
+
+                    const part = matFull.substring(0, matSplit);
+                    const traceId = traceFull.substring(traceSplit + 1);
+                    const qty = Number(qtyStr);
+
+                    return { part: part, qty: qty, traceId: traceId, serialNo: serialNo };
+                } catch (e) {
+                    console.error('pdaParseLine error:', e, raw);
+                    return null;
+                }
             },
 
-            /* 即時更新textarea筆數和重複檢測 */
+            /* ===== PDA掃碼：即時筆數與重複檢測 ===== */
+            /* 重複判定規則：整行原始文本完全相同才算重複（不同流水碼=不同料件） */
             pdaScanCountUpdate() {
                 const scanText = document.getElementById('pdaScanText').value;
-                const lines = scanText.split('\n').filter(line => line.trim() !== '');
+                const lines = scanText.split('\n').filter(function(line) { return line.trim() !== ''; });
                 const countEl = document.getElementById('pdaScanCount');
                 const dupInfoEl = document.getElementById('pdaDupInfo');
 
                 /* 計算有效行數 */
                 let validCount = 0;
-                const parsedLines = [];
-                lines.forEach(line => {
-                    const parsed = this.pdaParseLine(line.trim());
+                const rawLines = [];
+                lines.forEach(function(line) {
+                    const trimmed = line.trim();
+                    const parsed = app.pdaParseLine(trimmed);
                     if (parsed) {
                         validCount++;
-                        parsedLines.push(parsed);
+                        rawLines.push(trimmed);
                     }
                 });
 
                 countEl.textContent = validCount;
 
-                /* 重複檢測 */
-                let fullDupCount = 0;
-                let partialDupCount = 0;
-                const seenKeys = {};
-
-                for (let i = 0; i < parsedLines.length; i++) {
-                    const p = parsedLines[i];
-                    /* 全重複key：料號+片數+TRACE ID+流水號 */
-                    const fullKey = p.part + '|' + p.qty + '|' + p.traceId + '|' + p.serialNo;
-                    /* 部分重複key：料號+片數+TRACE ID（不含流水號） */
-                    const partialKey = p.part + '|' + p.qty + '|' + p.traceId;
-
-                    if (seenKeys[fullKey]) {
-                        /* 全重複：料號+片數+TRACE ID+流水號都相同 → 錯誤 */
-                        fullDupCount++;
+                /* 重複檢測：整行原始文本完全相同才算重複 */
+                let dupCount = 0;
+                const seenLines = {};
+                rawLines.forEach(function(raw) {
+                    if (seenLines[raw]) {
+                        dupCount++;
                     } else {
-                        if (seenKeys[partialKey]) {
-                            /* 部分重複：料號+片數+TRACE ID相同但流水號不同 → 正常，但仍標記 */
-                            partialDupCount++;
-                        }
-                        seenKeys[fullKey] = true;
-                        seenKeys[partialKey] = true;
+                        seenLines[raw] = true;
                     }
-                }
+                });
 
                 /* 顯示重複提示 */
                 let dupHtml = '';
-                if (fullDupCount > 0) {
-                    dupHtml += '<span class="pda-dup-full">⚠️ ' + fullDupCount + '筆完全重複（錯誤）</span>';
-                }
-                if (partialDupCount > 0) {
-                    if (dupHtml) dupHtml += ' ';
-                    dupHtml += '<span class="pda-dup-partial">ℹ️ ' + partialDupCount + '筆部分重複（正常）</span>';
+                if (dupCount > 0) {
+                    dupHtml = '<span class="pda-dup-full">⚠️ ' + dupCount + '筆完全重複</span>';
                 }
                 dupInfoEl.innerHTML = dupHtml;
             },
 
-            /* 回上一步：刪除textarea中最後一行（剛刷的那筆） */
+            /* ===== PDA掃碼：回上一步（刪除最後一行） ===== */
             pdaScanUndo() {
                 const textarea = document.getElementById('pdaScanText');
                 const value = textarea.value;
@@ -1426,9 +1046,8 @@
                     return;
                 }
 
-                /* 刪除最後一行 */
+                /* 刪除最後一個非空行 */
                 const lines = value.split('\n');
-                /* 從後往前找到最後一個非空行並刪除 */
                 let lastNonEmptyIndex = -1;
                 for (let i = lines.length - 1; i >= 0; i--) {
                     if (lines[i].trim() !== '') {
@@ -1448,14 +1067,15 @@
 
                 /* 即時更新筆數和重複檢測 */
                 this.pdaScanCountUpdate();
-                this.showToast('已撤銷最後一筆：' + deletedLine.substring(0, 30) + (deletedLine.length > 30 ? '...' : ''));
+                const preview = deletedLine.substring(0, 30);
+                this.showToast('已撤銷最後一筆：' + preview + (deletedLine.length > 30 ? '...' : ''));
             },
 
-            /* ===== 新增方法：解析並匯入統計（需確認，使用原有邏輯） ===== */
-
+            /* ===== PDA掃碼：確認解析並匯入 ===== */
             confirmPdaParse() {
                 const stackVal = document.getElementById('pdaStack').value.trim();
                 const scanText = document.getElementById('pdaScanText').value.trim();
+
                 if (!stackVal) {
                     this.showToast('請先填寫棧號');
                     return;
@@ -1464,24 +1084,34 @@
                     this.showToast('請貼上PDA掃描條碼');
                     return;
                 }
-                const lines = scanText.split('\n').filter(line => line.trim() !== '');
-                /* 先檢測重複數量，顯示在確認彈窗中 */
-                const parsedLines = [];
-                let fullDupCount = 0;
-                lines.forEach(line => {
-                    const parsed = this.pdaParseLine(line.trim());
-                    if (parsed) parsedLines.push(parsed);
-                });
-                const seenFullKeys = {};
-                parsedLines.forEach(p => {
-                    const fullKey = p.part + '|' + p.qty + '|' + p.traceId + '|' + p.serialNo;
-                    if (seenFullKeys[fullKey]) fullDupCount++;
-                    seenFullKeys[fullKey] = true;
+
+                const lines = scanText.split('\n').filter(function(line) { return line.trim() !== ''; });
+                /* 計算有效筆數和重複筆數 */
+                let validCount = 0;
+                let dupCount = 0;
+                const seenRawLines = {};
+                lines.forEach(function(line) {
+                    const trimmed = line.trim();
+                    const parsed = app.pdaParseLine(trimmed);
+                    if (parsed) {
+                        validCount++;
+                        /* 整行完全相同才算重複 */
+                        if (seenRawLines[trimmed]) {
+                            dupCount++;
+                        } else {
+                            seenRawLines[trimmed] = true;
+                        }
+                    }
                 });
 
-                let msg = '確定要解析 ' + parsedLines.length + ' 筆有效掃描資料並匯入統計嗎？\n匯入後將在整體統計結果中顯示。';
-                if (fullDupCount > 0) {
-                    msg += '\n⚠️ 有 ' + fullDupCount + ' 筆完全重複將被跳過。';
+                if (validCount === 0) {
+                    this.showToast('無有效掃描資料，檢查格式');
+                    return;
+                }
+
+                let msg = '確定要解析 ' + validCount + ' 筆有效掃描資料並匯入統計嗎？\n匯入後將在整體統計結果中顯示。';
+                if (dupCount > 0) {
+                    msg += '\n⚠️ 有 ' + dupCount + ' 筆完全重複將被跳過。';
                 }
 
                 this.showConfirmModal({
@@ -1494,10 +1124,12 @@
                 });
             },
 
-            /* PDA解析並匯入（使用原有parsePdaScan邏輯，直接匯入groupData） */
+            /* ===== PDA掃碼：解析並匯入執行 ===== */
+            /* 重複判定：整行原始文本完全相同才跳過（不同流水碼=不同料件，不跳過） */
             pdaParseAndImport() {
                 const stackVal = document.getElementById('pdaStack').value.trim();
                 const scanText = document.getElementById('pdaScanText').value.trim();
+
                 if (!stackVal) {
                     this.showToast('請先填寫棧號');
                     return;
@@ -1506,42 +1138,35 @@
                     this.showToast('請貼上PDA掃描條碼');
                     return;
                 }
-                const lines = scanText.split('\n').filter(line => line.trim() !== '');
+
+                const lines = scanText.split('\n').filter(function(line) { return line.trim() !== ''; });
                 let successCnt = 0;
                 let dupSkipCnt = 0;
 
-                /* 用於追蹤本次匯入中已處理的全重複key，避免同一批次內重複匯入 */
-                const batchSeenFullKeys = {};
+                /* 用於追蹤本次匯入中已處理的整行原始文本，避免同一批次內重複匯入 */
+                const batchSeenRawLines = {};
 
-                lines.forEach(line => {
+                lines.forEach(function(line) {
                     const raw = line.trim();
-                    const arr = raw.split('|');
-                    if (arr.length < 5) return;
+                    const parsed = app.pdaParseLine(raw);
+                    if (!parsed) {
+                        return;
+                    }
 
-                    const matFull = arr[0].trim();
-                    const traceFull = arr[1].trim();
-                    const qtyStr = arr[2].trim();
-                    const serialNo = arr[4] ? arr[4].trim() : '';
-
-                    const matSplit = matFull.lastIndexOf('-');
-                    const traceSplit = traceFull.lastIndexOf('-');
-                    if (matSplit === -1 || traceSplit === -1 || isNaN(Number(qtyStr))) return;
-
-                    const part = matFull.substring(0, matSplit);
-                    const traceId = traceFull.substring(traceSplit + 1);
-                    const qty = Number(qtyStr);
-
-                    /* 全重複檢測：料號+片數+TRACE ID+流水號全相同 → 跳過 */
-                    const fullDupKey = part + '|' + qty + '|' + traceId + '|' + serialNo;
-                    if (batchSeenFullKeys[fullDupKey]) {
+                    /* 整行完全相同才算重複並跳過 */
+                    if (batchSeenRawLines[raw]) {
                         dupSkipCnt++;
                         return;
                     }
-                    batchSeenFullKeys[fullDupKey] = true;
+                    batchSeenRawLines[raw] = true;
 
-                    /* 使用原有邏輯匯入groupData（與原parsePdaScan完全一致） */
+                    const part = parsed.part;
+                    const traceId = parsed.traceId;
+                    const qty = parsed.qty;
+
+                    /* 匯入groupData */
                     const groupKey = stackVal + '|' + part;
-                    let targetGroup = this.groupData.find(g => g.key === groupKey);
+                    let targetGroup = app.groupData.find(function(g) { return g.key === groupKey; });
                     if (!targetGroup) {
                         targetGroup = {
                             key: groupKey,
@@ -1552,7 +1177,7 @@
                             qtyBoxMap: {},
                             traceMap: {}
                         };
-                        this.groupData.push(targetGroup);
+                        app.groupData.push(targetGroup);
                     }
 
                     targetGroup.totalQty += qty;
@@ -1586,231 +1211,28 @@
                 this.pdaScanCountUpdate();
                 /* 更新整體統計結果顯示 */
                 this.calcAll();
-            },
-
-            /* ===== 新增方法：PDA新增輸入列（迷你框，只有料號+片數兩格） ===== */
-
-            confirmPdaAddRow() {
-                this.showConfirmModal({
-                    icon: '➕',
-                    title: '新增輸入列',
-                    msg: '確定要新增一筆手動輸入列嗎？\n新增後可填寫料號和片數，再送出或全部一次送出。',
-                    confirmText: '新增',
-                    confirmClass: 'confirm-blue',
-                    onConfirm: function() { app.pdaAddRowInternal(); }
-                });
-            },
-
-            pdaAddRowInternal() {
-                const wrap = document.getElementById('pdaManualWrap');
-                const rowCount = wrap.querySelectorAll('.pda-manual-row').length;
-                const row = document.createElement('div');
-                row.className = 'pda-manual-row';
-                row.innerHTML = `
-                    <div class="pda-m-row-title">手動輸入 #${rowCount + 1}</div>
-                    <button class="pda-m-del" onclick="app.pdaDelManualRow(this)">×</button>
-                    <input type="text" class="pda-m-part" placeholder="料號">
-                    <input type="text" inputmode="numeric" class="pda-m-qty" placeholder="片數">
-                    <button class="pda-m-submit" onclick="app.pdaSubmitManual(this)">送出本筆</button>
-                `;
-                wrap.appendChild(row);
-                /* 顯示全部列一次送出按鈕 */
-                document.getElementById('btnPdaBatch').style.display = 'block';
-                this.showToast('已新增手動輸入列 #' + (rowCount + 1));
-            },
-
-            /* PDA手動輸入列送出本筆（匯入groupData，使用原有邏輯） */
-            pdaSubmitManual(btn) {
-                const row = btn.closest('.pda-manual-row');
-                const part = row.querySelector('.pda-m-part').value.trim();
-                const qtyVal = row.querySelector('.pda-m-qty').value.trim();
-                const qty = Number(qtyVal);
-                const stackVal = document.getElementById('pdaStack').value.trim();
-
-                if (!stackVal) {
-                    this.showToast('請先在上方填寫棧號');
-                    return;
-                }
-                if (!part) {
-                    this.showToast('請輸入料號');
-                    return;
-                }
-                if (!qtyVal || qty <= 0) {
-                    this.showToast('請輸入有效片數');
-                    return;
-                }
-
-                /* 使用原有邏輯匯入groupData */
-                const groupKey = stackVal + '|' + part;
-                let targetGroup = this.groupData.find(g => g.key === groupKey);
-                if (!targetGroup) {
-                    targetGroup = {
-                        key: groupKey,
-                        stack: stackVal,
-                        part: part,
-                        totalQty: 0,
-                        totalBox: 0,
-                        qtyBoxMap: {},
-                        traceMap: {}
-                    };
-                    this.groupData.push(targetGroup);
-                }
-
-                targetGroup.totalQty += qty;
-                targetGroup.totalBox += 1;
-                targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
-
-                /* 清空此列輸入 */
-                row.querySelector('.pda-m-part').value = '';
-                row.querySelector('.pda-m-qty').value = '';
-
-                /* 更新整體統計結果顯示 */
-                this.calcAll();
-                this.showToast('✅ 已送出：' + part + ' / ' + qty + '片');
-            },
-
-            /* 刪除PDA手動輸入列 */
-            pdaDelManualRow(btn) {
-                const wrap = document.getElementById('pdaManualWrap');
-                const allRows = wrap.querySelectorAll('.pda-manual-row');
-                if (allRows.length <= 0) return;
-                btn.closest('.pda-manual-row').remove();
-                /* 如果沒有手動列了，隱藏全部送出按鈕 */
-                const remainingRows = wrap.querySelectorAll('.pda-manual-row');
-                if (remainingRows.length === 0) {
-                    document.getElementById('btnPdaBatch').style.display = 'none';
-                }
-                /* 重新編號 */
-                remainingRows.forEach((r, i) => {
-                    const titleEl = r.querySelector('.pda-m-row-title');
-                    if (titleEl) titleEl.textContent = '手動輸入 #' + (i + 1);
-                });
-            },
-
-            /* 重置PDA手動輸入列區域 */
-            resetPdaManualWrap() {
-                const wrap = document.getElementById('pdaManualWrap');
-                wrap.innerHTML = '';
-                document.getElementById('btnPdaBatch').style.display = 'none';
-            },
-
-            /* ===== 新增方法：PDA全部列一次送出（需確認） ===== */
-
-            confirmPdaBatchSubmit() {
-                const wrap = document.getElementById('pdaManualWrap');
-                const allRows = wrap.querySelectorAll('.pda-manual-row');
-                let validCount = 0;
-                allRows.forEach(row => {
-                    const part = row.querySelector('.pda-m-part').value.trim();
-                    const qtyVal = row.querySelector('.pda-m-qty').value.trim();
-                    if (part && qtyVal && Number(qtyVal) > 0) validCount++;
-                });
-
-                if (validCount === 0) {
-                    this.showToast('沒有可送出的有效資料');
-                    return;
-                }
-
-                this.showConfirmModal({
-                    icon: '🔹',
-                    title: '全部列一次送出',
-                    msg: '確定要送出 ' + validCount + ' 筆手動輸入資料到統計系統嗎？\n匯入後將在整體統計結果中顯示。',
-                    confirmText: '送出',
-                    confirmClass: 'confirm-purple',
-                    onConfirm: function() { app.pdaBatchSubmitInternal(); }
-                });
-            },
-
-            pdaBatchSubmitInternal() {
-                const wrap = document.getElementById('pdaManualWrap');
-                const allRows = wrap.querySelectorAll('.pda-manual-row');
-                const stackVal = document.getElementById('pdaStack').value.trim();
-                let successCnt = 0;
-
-                if (!stackVal) {
-                    this.showToast('請先在上方填寫棧號');
-                    return;
-                }
-
-                allRows.forEach(row => {
-                    const part = row.querySelector('.pda-m-part').value.trim();
-                    const qtyVal = row.querySelector('.pda-m-qty').value.trim();
-                    const qty = Number(qtyVal);
-
-                    if (!part || !qtyVal || qty <= 0) return;
-
-                    /* 使用原有邏輯匯入groupData */
-                    const groupKey = stackVal + '|' + part;
-                    let targetGroup = this.groupData.find(g => g.key === groupKey);
-                    if (!targetGroup) {
-                        targetGroup = {
-                            key: groupKey,
-                            stack: stackVal,
-                            part: part,
-                            totalQty: 0,
-                            totalBox: 0,
-                            qtyBoxMap: {},
-                            traceMap: {}
-                        };
-                        this.groupData.push(targetGroup);
-                    }
-
-                    targetGroup.totalQty += qty;
-                    targetGroup.totalBox += 1;
-                    targetGroup.qtyBoxMap[qty] = (targetGroup.qtyBoxMap[qty] || 0) + 1;
-
-                    successCnt++;
-
-                    /* 清空此列輸入 */
-                    row.querySelector('.pda-m-part').value = '';
-                    row.querySelector('.pda-m-qty').value = '';
-                });
-
-                if (successCnt === 0) {
-                    this.showToast('沒有可送出的有效資料');
-                    return;
-                }
-
-                /* 更新整體統計結果顯示 */
-                this.calcAll();
-                this.showToast('✅ 已送出 ' + successCnt + ' 焖手動輸入資料到統計系統');
             }
         };
 
-        /* 原有全域事件（完全不動） */
-        document.addEventListener('keydown', e=>{
-            if(e.key==='Enter') {
-                const lastBtn = document.querySelector('.input-row:last-child .btn-submit');
-                if(lastBtn) lastBtn.click();
-            }
-        });
-
-        window.addEventListener('load', () => {
-            document.body.style.visibility = 'visible';
-        });
-
-        window.goParentTab = function(tabName) {
+        /* ===== 初始化應用 ===== */
+        document.addEventListener('DOMContentLoaded', function() {
             try {
-                if (window.parent && window.parent !== window) {
-                    window.parent.postMessage({
-                        type: 'SWITCH_TOOL',
-                        tab: tabName
-                    }, '*');
-                }
-            } catch (err) {}
-        };
-
-        /* 新增：textarea input事件監聽，即時更新筆數和重複檢測 */
-        document.getElementById('pdaScanText').addEventListener('input', function() {
-            app.pdaScanCountUpdate();
-        });
-
-        /* 新增：確認彈窗點擊遮罩關閉 */
-        document.getElementById('confirmOverlay').addEventListener('click', function(e) {
-            if (e.target === this) {
-                app.hideConfirmModal();
+                app.init();
+            } catch (e) {
+                console.error('App init error:', e);
             }
         });
+
+        /* ===== 備用：超時初始化兜底 ===== */
+        setTimeout(function() {
+            try {
+                if (!app.rowsWrap) {
+                    app.init();
+                }
+            } catch (e) {
+                console.error('App timeout init error:', e);
+            }
+        }, 500);
     </script>
 </body>
 </html>
