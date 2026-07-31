@@ -17,7 +17,7 @@
                 <button class="pda-scan-undo" id="btnPdaUndo">↩ 回上一步</button>
             </div>
             <div id="pdaStatusMsg" class="pda-dup-info" style="display:none;"></div>
-            <textarea class="pda-textarea" id="pdaScanText" placeholder="貼上PDA掃描條碼，每行一筆&#10;格式範例：料號-001|TR-252001|150||S0001"></textarea>
+            <textarea class="pda-textarea" id="pdaScanText" placeholder="貼上PDA掃描條碼，每行一筆&#10;支援範例：&#10;151-1538-000$AA-633372|N260408026-20260603|3|流水|ZKL&#10;064-0332-000-004408|2619-20260516|1500|流水|Amphenol1D13MAY26&#10;R48.0G309.00SD-626925|0003-2625|84|"></textarea>
             <button class="btn-pda-submit" id="btnPdaParse">解析並匯入統計</button>
         </div>
     </div>
@@ -100,6 +100,65 @@ function formatDate(date) {
     return y + '/' + m + '/' + d;
 }
 
+/* ===== 工具函數：YYYYMMDD 轉 ISO 週（YYWW） ===== */
+function dateToYYWW(dateStr) {
+    try {
+        const y = parseInt(dateStr.substring(0, 4), 10);
+        const m = parseInt(dateStr.substring(4, 6), 10) - 1;
+        const d = parseInt(dateStr.substring(6, 8), 10);
+        const date = new Date(y, m, d);
+        if (isNaN(date.getTime())) return null;
+        const target = new Date(date.getTime());
+        const dayNr = (date.getDay() + 6) % 7; // Monday=0
+        target.setDate(date.getDate() - dayNr + 3); // Thursday of current week
+        const isoYear = target.getFullYear();
+        const firstThursday = new Date(isoYear, 0, 4);
+        const firstDayNr = (firstThursday.getDay() + 6) % 7;
+        firstThursday.setDate(firstThursday.getDate() - firstDayNr + 3);
+        const week = 1 + Math.round((target - firstThursday) / (7 * 24 * 60 * 60 * 1000));
+        if (week < 1 || week > 53) return null;
+        return String(isoYear % 100).padStart(2, '0') + String(week).padStart(2, '0');
+    } catch (e) {
+        console.error('dateToYYWW error:', e, dateStr);
+        return null;
+    }
+}
+
+/* ===== 工具函數：Trace ID 多格式解析（新增：前後4碼取最新週期） ===== */
+function parseTraceId(field) {
+    if (!field) return null;
+    const s = field.trim();
+    // 1. 純 4 位數字：2628
+    if (/^\d{4}$/.test(s)) return s;
+    // 2. 開頭 4 位數字 + 8 位日期：2619-20260516、2619_20260516 → 取開頭 4 碼
+    let m = s.match(/^(\d{4})[-_/](\d{8})$/);
+    if (m) return m[1];
+    // 3. 前後各 4 位數字：0003-2625、0002-2616、001-2628 → 取週期較新者（數值較大）
+    m = s.match(/^(\d{4})[-_/](\d{4})$/);
+    if (m) {
+        const a = m[1], b = m[2];
+        return parseInt(b, 10) > parseInt(a, 10) ? b : a;
+    }
+    // 4. 結尾 8 位日期：N260408026-20260603 → 日期轉 YYWW
+    const dateMatch = s.match(/(\d{8})$/);
+    if (dateMatch) {
+        const yyww = dateToYYWW(dateMatch[1]);
+        if (yyww) return yyww;
+    }
+    // 5. 純 8 位日期：20260603 → 轉 YYWW
+    if (/^\d{8}$/.test(s)) {
+        const yyww = dateToYYWW(s);
+        if (yyww) return yyww;
+    }
+    // 6. 最後一個 - / _ 後的 4 位數字：001-2628、xxxx_2628
+    const sepIdx = Math.max(s.lastIndexOf('-'), s.lastIndexOf('_'), s.lastIndexOf('/'));
+    if (sepIdx !== -1) {
+        const afterSep = s.substring(sepIdx + 1);
+        if (/^\d{4}$/.test(afterSep)) return afterSep;
+    }
+    return null;
+}
+
 /* ===== 主應用邏輯 ===== */
 const app = {
     rowsWrap: null,
@@ -131,7 +190,7 @@ const app = {
         document.getElementById('pdaScanText').addEventListener('input', function() { app.pdaScanCountUpdate(); });
         document.getElementById('confirmOverlay').addEventListener('click', function(e) { if (e.target === this) { app.hideConfirmModal(); } });
         document.addEventListener('keydown', function(e) { if (e.key === 'Enter') { const lastBtn = document.querySelector('.input-row:last-child .btn-submit'); if (lastBtn) { lastBtn.click(); } } });
-        this.pdaScanCountUpdate(); // 初始化状态提示隐藏
+        this.pdaScanCountUpdate();
         this.calcAll();
     },
     togglePdaBox() {
@@ -402,15 +461,15 @@ const app = {
     onConfirmOk() { if (this._confirmCallback) { this._confirmCallback(); } this.hideConfirmModal(); },
     onConfirmCancel() { this.hideConfirmModal(); },
 
-    /* ===== 修正後的PDA解析邏輯 ===== */
+    /* ===== PDA解析邏輯 ===== */
     pdaParseLine(raw) {
         try {
             const arr = raw.split('|');
-            if (arr.length < 4) return null;
+            if (arr.length < 3) return null;
             let part = arr[0].trim();
             const traceFull = arr[1].trim();
             const qtyStr = arr[2].trim();
-            const serialNo = arr.length === 5 ? arr[3].trim() : '無';
+            const serialNo = (arr.length >= 4 && arr[3].trim()) ? arr[3].trim() : '無';
             // 片数验证：必须为正整数
             const qty = parseInt(qtyStr, 10);
             if (isNaN(qty) || qty <= 0) return null;
@@ -422,21 +481,9 @@ const app = {
                     part = part.substring(0, lastDash);
                 }
             }
-            // Trace ID 解析：支持纯4位数字 或 数字-4位数字
-            let traceId = null;
-            const trimmedTrace = traceFull;
-            if (/^\d{4}$/.test(trimmedTrace)) {
-                traceId = trimmedTrace;
-            } else {
-                const dashIdx = trimmedTrace.lastIndexOf('-');
-                if (dashIdx !== -1) {
-                    const afterDash = trimmedTrace.substring(dashIdx + 1);
-                    if (/^\d{4}$/.test(afterDash)) {
-                        traceId = afterDash;
-                    }
-                }
-            }
-            if (!traceId) return null; // trace无效
+            // Trace ID 解析：支援多種格式，前後4碼取最新週期
+            const traceId = parseTraceId(traceFull);
+            if (!traceId) return null;
             return { part: part, qty: qty, traceId: traceId, serialNo: serialNo };
         } catch (e) {
             console.error('pdaParseLine error:', e, raw);
@@ -459,7 +506,7 @@ const app = {
             const trimmed = line.trim();
             if (!trimmed) return;
             const parsed = app.pdaParseLine(trimmed);
-            if (parsed && parsed.traceId) {
+            if (parsed) {
                 validCount++;
                 rawLines.push(trimmed);
             } else {
@@ -523,7 +570,7 @@ const app = {
             const trimmed = line.trim();
             if (!trimmed) return;
             const parsed = app.pdaParseLine(trimmed);
-            if (parsed && parsed.traceId) {
+            if (parsed) {
                 validCount++;
                 if (seenRawLines[trimmed]) dupCount++;
                 else seenRawLines[trimmed] = true;
