@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>條碼紀錄過濾器</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+body{
+background:#111;
+color:#fff;
+padding:max(env(safe-area-inset-top),16px) 16px max(env(safe-area-inset-bottom),16px);
+min-height:100vh;
+}
+h2{
+margin-bottom:12px;
+font-size:20px;
+font-weight:500;
+}
+textarea{
+width:100%;
+min-height:220px;
+padding:14px;
+border-radius:10px;
+border:0;
+font-size:16px;
+background:#1e1e1e;
+color:#fff;
+outline:2px solid #333;
+resize:vertical;
+margin-bottom:14px;
+}
+textarea:focus{
+outline-color:#2563eb;
+}
+.btns{
+display:flex;
+gap:10px;
+margin-bottom:14px;
+flex-wrap:wrap;
+}
+button{
+position:relative;
+overflow:hidden;
+padding:12px 18px;
+border-radius:8px;
+border:none;
+font-size:16px;
+cursor:pointer;
+background:#2563eb;
+color:white;
+transition:opacity 0.2s;
+-webkit-tap-highlight-color:transparent;
+}
+button:active{
+opacity:0.85;
+}
+button.secondary{
+background:#333;
+}
+/* 水漣漪效果 */
+button .ripple{
+position:absolute;
+border-radius:50%;
+background:rgba(255,255,255,0.3);
+transform:scale(0);
+animation:rippleAnim 0.5s linear;
+pointer-events:none;
+}
+@keyframes rippleAnim{
+to{
+transform:scale(4);
+opacity:0;
+}
+}
+#result{
+white-space:pre-wrap;
+background:#1e1e1e;
+padding:14px;
+border-radius:10px;
+min-height:220px;
+font-size:15px;
+line-height:1.5;
+}
+/* Toast 提示 */
+.toast{
+position:fixed;
+left:50%;
+bottom:calc(max(env(safe-area-inset-bottom),20px) + 10px);
+transform:translateX(-50%);
+background:rgba(40,40,40,0.92);
+color:#fff;
+padding:10px 22px;
+border-radius:30px;
+font-size:15px;
+opacity:0;
+transition:opacity 0.25s;
+pointer-events:none;
+z-index:999;
+}
+.toast.show{
+opacity:1;
+}
+</style>
+</head>
+<body>
+<h2>貼上原始掃描紀錄</h2>
+<textarea id="inputBox" placeholder="把BarcodeScanners歷史資料貼到此處"></textarea>
+<div class="btns">
+<button onclick="pasteContent()">貼上</button>
+<button onclick="filterText()">過濾</button>
+<button class="secondary" onclick="copyResult()">複製</button>
+<button class="secondary" onclick="clearAll()">清空</button>
+</div>
+<h2>過濾完成結果</h2>
+<div id="result"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 水漣漪點擊效果
+document.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click',function(e){
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        ripple.style.left = x+'px';
+        ripple.style.top = y+'px';
+        this.appendChild(ripple);
+        setTimeout(()=>ripple.remove(),500);
+    })
+})
+
+// Toast 通知
+function showToast(msg){
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'),2200);
+}
+
+// 貼上剪貼簿
+async function pasteContent(){
+    try{
+        const text = await navigator.clipboard.readText();
+        document.getElementById('inputBox').value = text;
+        showToast('已貼上剪貼簿內容');
+    }catch(err){
+        showToast('無法讀取剪貼簿，請手動貼上');
+    }
+}
+
+// 文字過濾邏輯
+function filterText(){
+    const raw = document.getElementById('inputBox').value;
+    const lines = raw.split('\n');
+    const output = [];
+    lines.forEach(line=>{
+        const trimLine = line.trim();
+        if(!trimLine) return;
+        if(trimLine.startsWith('BarcodeScanners History,')) return;
+        if(trimLine.includes(']:')){
+            const content = trimLine.split(']:')[1].trim();
+            if(content) output.push(content);
+        }else{
+            output.push(trimLine);
+        }
+    });
+    document.getElementById('result').innerText = output.join('\n');
+    showToast('過濾完成');
+}
+
+// 複製結果
+async function copyResult(){
+    const text = document.getElementById('result').innerText;
+    if(!text.trim()){
+        showToast('沒有可複製內容');
+        return;
+    }
+    try{
+        await navigator.clipboard.writeText(text);
+        showToast('已複製結果');
+    }catch(err){
+        showToast('複製失敗，請手動選取');
+    }
+}
+
+// 清空輸入與結果
+function clearAll(){
+    document.getElementById('inputBox').value = '';
+    document.getElementById('result').innerText = '';
+    showToast('已清空');
+}
+</script>
+</body>
+</html>
