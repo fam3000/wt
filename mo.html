@@ -26,6 +26,36 @@ body {
     border-radius: 10px;
     box-shadow: 0 2px 8px #00000022;
 }
+.setting-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+    margin-bottom:12px;
+    align-items:center;
+}
+.setting-item{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.setting-item input{
+    width:60px;
+    padding:4px;
+    font-size:14px;
+}
+.control-panel textarea{
+    width:100%;
+    padding:10px;
+    font-size:16px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    margin-bottom:12px;
+}
+.control-panel .btn-group{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
 .control-panel button {
     padding: 10px 24px;
     font-size: 16px;
@@ -34,6 +64,9 @@ body {
     border-radius: 6px;
     background: #2563eb;
     color: #fff;
+}
+.control-panel button.secondary{
+    background:#666;
 }
 
 /* A4頁面容器(螢幕預覽模擬紙張) */
@@ -56,7 +89,7 @@ body {
     padding: 4mm;
 }
 
-/* 工單表格樣式，完全還原照片版型｜加粗框線+文字加粗 */
+/* 工單表格樣式【版型完全固定，不修改】 */
 .work-table {
     width: 100%;
     height: 100%;
@@ -67,13 +100,14 @@ body {
     border: 1.6px solid #000;
     padding: 3mm;
     vertical-align: middle;
-    font-size: 15px;
     font-weight: bold;
+    font-size:var(--base-font);
 }
 /* 左側標題欄 */
 .work-table td.label-col {
     text-align: center;
     width: 18%;
+    font-size:var(--label-font);
 }
 /* 第一列：日期 + 線別 雙欄 */
 .work-table tr:nth-child(1) td:nth-child(2) {
@@ -88,6 +122,7 @@ body {
 /* 資料填入欄位靠左對齊 */
 .work-table td.data-cell {
     text-align: left;
+    font-size:var(--content-font);
 }
 
 /* ========== 列印專用樣式 ========== */
@@ -116,7 +151,28 @@ body {
 <body>
 <!-- 操作控制面板 -->
 <div class="control-panel">
-    <button onclick="window.print()">🖨️ 列印表單</button>
+    <div class="setting-row">
+        <div class="setting-item">
+            <label>全域基礎字型(px)：</label>
+            <input type="number" id="baseFont" value="15" min="10" max="30">
+        </div>
+        <div class="setting-item">
+            <label>標籤字型(px)：</label>
+            <input type="number" id="labelFont" value="15" min="10" max="30">
+        </div>
+        <div class="setting-item">
+            <label>內容字型(px)：</label>
+            <input type="number" id="contentFont" value="15" min="10" max="30">
+        </div>
+    </div>
+    <h3>批次匯入｜一行=一筆，格式：庫別,日期,線別,M/O,機種,套數,備註,儲位</h3>
+    <textarea id="inputText" rows="5" placeholder="範例：
+W131,8/4,S07,48732467,UT3,50,R48.0G334.001A,G1RB0711"></textarea>
+    <div class="btn-group">
+        <button onclick="batchLoad()">批次載入資料</button>
+        <button class="secondary" onclick="clearAll()">清空全部工單</button>
+        <button onclick="window.print()">🖨️ 列印表單</button>
+    </div>
 </div>
 
 <!-- A4紙張容器，內含2×2共4張A6表單 -->
@@ -128,22 +184,25 @@ body {
 </div>
 
 <script>
-/**
- * 資料來源：只需修改此data物件，四張表單同步更新
- */
-const data = {
-    date: "",
-    line: "",
-    mo: "",
-    model: "",
-    qty: "",
-    remark: ""
+//字型變數
+const fontSetting = {
+    base:15,
+    label:15,
+    content:15
 };
+//4組工單資料
+let formData = [null,null,null,null];
 
-/**
- * 單張工單HTML模板，橫向文字，結構對照紙本表格
- */
-function getSingleFormHtml() {
+//套用字型
+function applyFont(){
+    document.documentElement.style.setProperty('--base-font', fontSetting.base+'px');
+    document.documentElement.style.setProperty('--label-font', fontSetting.label+'px');
+    document.documentElement.style.setProperty('--content-font', fontSetting.content+'px');
+}
+
+//單張工單模板【版型完全固定，不做任何結構修改】
+function getTemplate(data){
+    if(!data) data={date:"",line:"",mo:"",model:"",qty:"",remark:""};
     return `
 <table class="work-table">
     <tr>
@@ -168,28 +227,79 @@ function getSingleFormHtml() {
         <td class="label-col">備　註</td>
         <td class="data-cell" colspan="3">${data.remark}</td>
     </tr>
-</table>
-    `;
+</table>`;
 }
 
-/**
- * 更新所有四張表單內容
- */
-function renderAllForm() {
-    const formHtml = getSingleFormHtml();
-    const formList = [
-        document.getElementById("form1"),
-        document.getElementById("form2"),
-        document.getElementById("form3"),
-        document.getElementById("form4")
+//重新渲染4張表單
+function renderAll(){
+    const list = [
+        document.getElementById('form1'),
+        document.getElementById('form2'),
+        document.getElementById('form3'),
+        document.getElementById('form4')
     ];
-    formList.forEach(item => {
-        item.innerHTML = formHtml;
-    });
+    for(let i=0;i<4;i++){
+        list[i].innerHTML = getTemplate(formData[i]);
+    }
 }
 
-// 初始執行渲染
-renderAllForm();
+//批次載入
+function batchLoad(){
+    const text = document.getElementById('inputText').value.trim();
+    if(!text){
+        alert("請填入資料！");
+        return;
+    }
+    const rows = text.split(/\r?\n/).filter(r=>r.trim()!=='');
+    formData = [null,null,null,null];
+    for(let i=0;i<rows.length;i++){
+        if(i>=4){
+            alert("最多支援4筆，多餘資料忽略");
+            break;
+        }
+        const arr = rows[i].split(',');
+        if(arr.length!==8){
+            alert(`第${i+1}行欄位錯誤，需8個欄位`);
+            return;
+        }
+        formData[i]={
+            date:arr[1].trim(),
+            line:arr[2].trim(),
+            mo:arr[3].trim(),
+            model:arr[4].trim(),
+            qty:arr[5].trim(),
+            remark:arr[6].trim()
+        };
+    }
+    renderAll();
+    document.getElementById('inputText').value='';
+    alert(`成功載入${Math.min(rows.length,4)}筆`);
+}
+
+//清空
+function clearAll(){
+    formData=[null,null,null,null];
+    document.getElementById('inputText').value='';
+    renderAll();
+}
+
+//字型監聽
+document.getElementById('baseFont').addEventListener('input',e=>{
+    fontSetting.base=Number(e.target.value);
+    applyFont();
+});
+document.getElementById('labelFont').addEventListener('input',e=>{
+    fontSetting.label=Number(e.target.value);
+    applyFont();
+});
+document.getElementById('contentFont').addEventListener('input',e=>{
+    fontSetting.content=Number(e.target.value);
+    applyFont();
+});
+
+//初始化
+applyFont();
+renderAll();
 </script>
 </body>
 </html>
