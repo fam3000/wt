@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>A4直式 2×2 A6工單列印工具</title>
+<style>
+/* 全域基礎樣式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: "Noto Sans TC", SimSun, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #eeeeee;
+    padding: 20px;
+}
+
+/* 控制面板(螢幕顯示，列印隱藏) */
+.control-panel {
+    max-width: 900px;
+    margin: 0 auto 30px;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #00000022;
+}
+.control-panel button {
+    padding: 10px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    background: #2563eb;
+    color: #fff;
+}
+
+/* A4頁面容器(螢幕預覽模擬紙張) */
+.a4-page {
+    width: 210mm;
+    min-height: 297mm;
+    background: #ffffff;
+    margin: 0 auto;
+    padding: 10mm;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0mm;
+}
+
+/* 單張A6表單容器 105mm × 148mm */
+.a6-form {
+    width: 105mm;
+    height: 148mm;
+    padding: 4mm;
+}
+
+/* 工單表格樣式，完全還原照片版型｜加粗框線+文字加粗 */
+.work-table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    border: 1.6px solid #000;
+}
+.work-table td {
+    border: 1.6px solid #000;
+    padding: 3mm;
+    vertical-align: middle;
+    font-size: 15px;
+    font-weight: bold;
+}
+/* 左側標題欄 */
+.work-table td.label-col {
+    text-align: center;
+    width: 18%;
+}
+/* 第一列：日期 + 線別 雙欄 */
+.work-table tr:nth-child(1) td:nth-child(2) {
+    width: 42%;
+}
+.work-table tr:nth-child(1) td:nth-child(3) {
+    width: 18%;
+}
+.work-table tr:nth-child(1) td:nth-child(4) {
+    width: 22%;
+}
+/* 資料填入欄位靠左對齊 */
+.work-table td.data-cell {
+    text-align: left;
+}
+
+/* ========== 列印專用樣式 ========== */
+@media print {
+    /* 隱藏控制面板 */
+    .control-panel {
+        display: none !important;
+    }
+    body {
+        background: #fff;
+        padding: 0;
+    }
+    /* 強制A4直式、禁止瀏覽器自動縮放 */
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+    .a4-page {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+    }
+}
+</style>
+</head>
+<body>
+<!-- 操作控制面板 -->
+<div class="control-panel">
+    <button onclick="window.print()">🖨️ 列印表單</button>
+</div>
+
+<!-- A4紙張容器，內含2×2共4張A6表單 -->
+<div class="a4-page">
+    <div class="a6-form" id="form1"></div>
+    <div class="a6-form" id="form2"></div>
+    <div class="a6-form" id="form3"></div>
+    <div class="a6-form" id="form4"></div>
+</div>
+
+<script>
+/**
+ * 資料來源：只需修改此data物件，四張表單同步更新
+ */
+const data = {
+    date: "",
+    line: "",
+    mo: "",
+    model: "",
+    qty: "",
+    remark: ""
+};
+
+/**
+ * 單張工單HTML模板，橫向文字，結構對照紙本表格
+ */
+function getSingleFormHtml() {
+    return `
+<table class="work-table">
+    <tr>
+        <td class="label-col">日　期</td>
+        <td class="data-cell">${data.date}</td>
+        <td class="label-col">線　別</td>
+        <td class="data-cell">${data.line}</td>
+    </tr>
+    <tr>
+        <td class="label-col">M/O</td>
+        <td class="data-cell" colspan="3">${data.mo}</td>
+    </tr>
+    <tr>
+        <td class="label-col">機　種</td>
+        <td class="data-cell" colspan="3">${data.model}</td>
+    </tr>
+    <tr>
+        <td class="label-col">套　數</td>
+        <td class="data-cell" colspan="3">${data.qty}</td>
+    </tr>
+    <tr>
+        <td class="label-col">備　註</td>
+        <td class="data-cell" colspan="3">${data.remark}</td>
+    </tr>
+</table>
+    `;
+}
+
+/**
+ * 更新所有四張表單內容
+ */
+function renderAllForm() {
+    const formHtml = getSingleFormHtml();
+    const formList = [
+        document.getElementById("form1"),
+        document.getElementById("form2"),
+        document.getElementById("form3"),
+        document.getElementById("form4")
+    ];
+    formList.forEach(item => {
+        item.innerHTML = formHtml;
+    });
+}
+
+// 初始執行渲染
+renderAllForm();
+</script>
+</body>
+</html>
