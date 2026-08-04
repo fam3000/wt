@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>逗號分隔 ⇄ Excel儲存格互轉工具</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+:root{
+    --primary:#2563eb;
+    --primary-light:#3b82f6;
+    --gray-100:#f3f4f6;
+    --gray-200:#e5e7eb;
+    --gray-600:#4b5563;
+    --gray-800:#1f2937;
+    --white:#ffffff;
+    --radius:10px;
+}
+body{
+    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;
+    background-color:#f0f4f9;
+    padding:20px 16px;
+    color:var(--gray-800);
+}
+.container{
+    max-width:860px;
+    margin:0 auto;
+}
+h1{
+    text-align:center;
+    font-size:24px;
+    margin-bottom:24px;
+    color:var(--gray-800);
+}
+.card{
+    background:var(--white);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.08);
+    margin-bottom:16px;
+}
+.title-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+.card h2{
+    font-size:17px;
+    font-weight:600;
+}
+textarea{
+    width:100%;
+    min-height:160px;
+    border:1px solid var(--gray-200);
+    border-radius:8px;
+    padding:12px;
+    font-size:15px;
+    line-height:1.55;
+    resize:vertical;
+    background:var(--gray-100);
+}
+textarea:focus{
+    outline:none;
+    border-color:var(--primary);
+    background:#fff;
+}
+.btn-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
+}
+button{
+    padding:10px 18px;
+    border-radius:8px;
+    border:none;
+    font-size:15px;
+    font-weight:500;
+    cursor:pointer;
+    transition:0.18s ease;
+}
+.btn-primary{
+    background:var(--primary);
+    color:#fff;
+}
+.btn-primary:hover{
+    background:var(--primary-light);
+}
+.btn-gray{
+    background:var(--gray-200);
+    color:var(--gray-800);
+}
+.btn-gray:hover{
+    background:#d1d5db;
+}
+/* 轉換模式切換區 */
+.mode-wrap{
+    text-align:center;
+    margin-bottom:20px;
+}
+.mode-btn{
+    padding:12px 22px;
+    margin:0 6px;
+}
+.mode-active{
+    background-color:var(--primary);
+    color:white;
+}
+.tip{
+    font-size:14px;
+    color:var(--gray-600);
+    margin-top:8px;
+}
+/* Toast通知 */
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:30px;
+    transform:translateX(-50%);
+    background:#222;
+    color:white;
+    padding:10px 22px;
+    border-radius:8px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s;
+}
+.toast.show{
+    opacity:1;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>逗號資料 ⇄ Excel儲存格互轉工具</h1>
+
+    <div class="card">
+        <div class="mode-wrap">
+            <button id="mode1" class="mode-btn mode-active">模式A：逗號 → Excel多格（Tab分隔）</button>
+            <button id="mode2" class="mode-btn btn-gray">模式B：Excel多格 → 逗號格式</button>
+        </div>
+        <div class="title-row">
+            <h2>輸入區</h2>
+        </div>
+        <textarea id="inputArea" placeholder="貼入資料範例：
+1.PR,W131,8/4,S07,48732467,UT3,850,R48.0G334.001A
+2.WE,W131,8/4,S07,48732468,UT3,50,R48.0G334.001A"></textarea>
+        <div class="btn-row">
+            <button class="btn-primary" onclick="convert()">開始轉換</button>
+            <button class="btn-gray" onclick="clearAll()">清空全部</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="title-row">
+            <h2>輸出結果</h2>
+            <button class="btn-primary" onclick="copyResult()">一鍵複製結果</button>
+        </div>
+        <textarea id="outputArea" readonly placeholder="轉換後內容會顯示於此..."></textarea>
+        <div class="tip">模式A複製直接貼Excel，自動拆分每一欄到獨立儲存格</div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const inputDom = document.getElementById('inputArea');
+const outputDom = document.getElementById('outputArea');
+const toastDom = document.getElementById('toast');
+
+let currentMode = 1; //1=逗號轉Tab(Excel), 2=Excel轉逗號
+
+document.getElementById('mode1').onclick = ()=>{
+    currentMode=1;
+    document.getElementById('mode1').classList.add('mode-active');
+    document.getElementById('mode2').classList.remove('mode-active');
+}
+document.getElementById('mode2').onclick = ()=>{
+    currentMode=2;
+    document.getElementById('mode2').classList.add('mode-active');
+    document.getElementById('mode1').classList.remove('mode-active');
+}
+
+//彈窗提示
+function showToast(text){
+    toastDom.innerText = text;
+    toastDom.classList.add('show');
+    setTimeout(()=>toastDom.classList.remove('show'),1600);
+}
+
+//核心轉換函數
+function convert(){
+    const raw = inputDom.value.trim();
+    if(!raw){
+        showToast('請輸入資料');
+        return;
+    }
+    const lines = raw.split(/\r?\n/);
+    const resultArr = [];
+
+    lines.forEach(line=>{
+        const str = line.trim();
+        if(!str) return;
+
+        if(currentMode === 1){
+            //模式A , → Tab符號 \t
+            const cells = str.split(',');
+            resultArr.push(cells.join('\t'));
+        }else{
+            //模式B：Excel複製出來（tab分隔）轉換成逗號
+            const cells = str.split('\t');
+            resultArr.push(cells.join(','));
+        }
+    })
+    outputDom.value = resultArr.join('\n');
+    showToast('轉換完成！');
+}
+
+//複製輸出
+function copyResult(){
+    if(!outputDom.value){
+        showToast('沒有可複製內容');
+        return;
+    }
+    navigator.clipboard.writeText(outputDom.value).then(()=>{
+        showToast('複製成功，可貼上Excel');
+    })
+}
+
+//清空
+function clearAll(){
+    inputDom.value='';
+    outputDom.value='';
+}
+</script>
+</body>
+</html>
