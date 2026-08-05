@@ -2,304 +2,798 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>A4直式 2×2 A6工單列印工具</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>MO小卡</title>
 <style>
-/* 全域基礎樣式 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-body {
-    font-family: "Noto Sans TC", SimSun, -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: #eeeeee;
-    padding: 20px;
-}
-
-/* 控制面板(螢幕顯示，列印隱藏) */
-.control-panel {
-    max-width: 900px;
-    margin: 0 auto 30px;
-    padding: 16px;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px #00000022;
-}
-.setting-row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:15px;
-    margin-bottom:12px;
-    align-items:center;
-}
-.setting-item{
-    display:flex;
-    align-items:center;
-    gap:6px;
-}
-.setting-item input{
-    width:60px;
-    padding:4px;
-    font-size:14px;
-}
-.control-panel textarea{
-    width:100%;
-    padding:10px;
-    font-size:16px;
-    border:1px solid #ccc;
-    border-radius:6px;
-    margin-bottom:12px;
-}
-.control-panel .btn-group{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-}
-.control-panel button {
-    padding: 10px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 6px;
-    background: #2563eb;
-    color: #fff;
-}
-.control-panel button.secondary{
-    background:#666;
-}
-
-/* A4頁面容器(螢幕預覽模擬紙張) */
-.a4-page {
-    width: 210mm;
-    min-height: 297mm;
-    background: #ffffff;
-    margin: 0 auto;
-    padding: 10mm;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 0mm;
-}
-
-/* 單張A6表單容器 105mm × 148mm */
-.a6-form {
-    width: 105mm;
-    height: 148mm;
-    padding: 4mm;
-}
-
-/* 工單表格樣式【版型完全固定，不修改】 */
-.work-table {
-    width: 100%;
-    height: 100%;
-    border-collapse: collapse;
-    border: 1.6px solid #000;
-}
-.work-table td {
-    border: 1.6px solid #000;
-    padding: 3mm;
-    vertical-align: middle;
-    font-weight: bold;
-    font-size:var(--base-font);
-}
-/* 左側標題欄 */
-.work-table td.label-col {
-    text-align: center;
-    width: 18%;
-    font-size:var(--label-font);
-}
-/* 第一列：日期 + 線別 雙欄 */
-.work-table tr:nth-child(1) td:nth-child(2) {
-    width: 42%;
-}
-.work-table tr:nth-child(1) td:nth-child(3) {
-    width: 18%;
-}
-.work-table tr:nth-child(1) td:nth-child(4) {
-    width: 22%;
-}
-/* 資料填入欄位靠左對齊 */
-.work-table td.data-cell {
-    text-align: left;
-    font-size:var(--content-font);
-}
-
-/* ========== 列印專用樣式 ========== */
+:root { --sat:max(env(safe-area-inset-top,0px),24px); --primary:#4F46E5; --primary-dark:#3730A3; --bg:#F3F4F6; --card:#FFFFFF; --text:#1F2937; --text2:#6B7280; --border:#E5E7EB; --danger:#EF4444; --base-font:30px; --label-font:30px; --content-font:30px; --remark-font:20px; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Segoe UI",sans-serif; background:var(--bg); color:var(--text); padding-top:100px; padding-bottom:90px; min-height:100vh; -webkit-tap-highlight-color:transparent; writing-mode:horizontal-tb; }
+.nav-bar { position:fixed; top:0; left:0; right:0; height:100px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); z-index:1000; display:flex; flex-direction:column; box-shadow:0 2px 12px rgba(79,70,229,0.3); }
+.nav-bar .status-bar { height:var(--sat); }
+.nav-bar .nav-content { flex:1; display:flex; align-items:flex-end; padding:0 16px 20px; position:relative; }
+.nav-bar .nav-title { flex:1; text-align:center; color:#fff; font-size:18px; font-weight:600; letter-spacing:1px; }
+.nav-bar .nav-btn { position:absolute; left:16px; bottom:18px; color:#fff; background:rgba(255,255,255,0.2); border:none; padding:8px 16px; border-radius:10px; font-size:14px; font-weight:500; cursor:pointer; }
+.nav-bar .nav-btn:active { background:rgba(255,255,255,0.35); }
+.main { max-width:600px; margin:0 auto; padding:12px; }
+.card { background:var(--card); border-radius:14px; padding:16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.card-title { font-size:15px; font-weight:600; color:var(--text); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.card-hint { font-size:12px; color:var(--text2); margin-bottom:8px; line-height:1.6; white-space:pre-line; }
+.form-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.form-row label { font-size:14px; color:var(--text2); min-width:72px; flex-shrink:0; }
+.form-row input[type="number"],.form-row input[type="text"],.form-row select { flex:1; padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#FAFAFA; color:var(--text); }
+.form-row input[type="range"] { flex:1; accent-color:var(--primary); }
+.form-row .val-label { min-width:50px; text-align:right; font-weight:600; font-size:14px; color:var(--primary); }
+textarea { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:13px; background:#FAFAFA; resize:vertical; font-family:monospace; color:var(--text); }
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:4px 0; }
+.toggle-label { font-size:14px; font-weight:500; }
+.toggle-switch { position:relative; width:46px; height:26px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+.toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#D1D5DB; border-radius:26px; transition:0.3s; }
+.toggle-slider:before { content:""; position:absolute; height:20px; width:20px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.3s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+.toggle-switch input:checked+.toggle-slider { background:var(--primary); }
+.toggle-switch input:checked+.toggle-slider:before { transform:translateX(20px); }
+.btn { padding:10px 16px; border:none; border-radius:10px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity 0.2s; }
+.btn:active { opacity:0.7; }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-secondary { background:#E5E7EB; color:var(--text); }
+.btn-danger { background:var(--danger); color:#fff; }
+.btn-sm { padding:8px 12px; font-size:13px; }
+.btn-row { display:flex; gap:10px; margin-top:10px; }
+.btn-row .btn { flex:1; }
+.entry-card { background:#F9FAFB; border-radius:10px; padding:12px; margin-top:10px; border-left:3px solid var(--primary); }
+.entry-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.entry-num { font-size:14px; font-weight:700; color:var(--primary); }
+.entry-info { font-size:12px; color:var(--text2); flex:1; }
+.entry-detail { font-size:12px; color:var(--text2); margin-bottom:2px; line-height:1.5; }
+.entry-toggles { display:flex; gap:16px; margin-top:8px; }
+.entry-toggles .toggle-row { flex:1; }
+.entry-section { margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); }
+.entry-empty { text-align:center; color:#9CA3AF; font-size:13px; padding:20px 0; }
+.btn-del { background:none; border:none; color:var(--danger); font-size:16px; cursor:pointer; padding:4px 8px; border-radius:6px; }
+.btn-del:active { background:rgba(239,68,68,0.1); }
+.split-preview { font-size:12px; color:var(--primary); margin-top:6px; padding:6px 10px; background:rgba(79,70,229,0.08); border-radius:6px; }
+.preview-summary { font-size:13px; color:var(--text2); margin-bottom:8px; text-align:center; font-weight:500; }
+.preview-wrapper { overflow:hidden; border-radius:8px; background:#fff; border:1px solid var(--border); }
+.preview-scaler { transform-origin:top left; }
+.preview-scaler .a6-form { position:relative; }
+.preview-scaler .form-badge { position:absolute; top:1mm; right:1mm; font-size:7px; color:#fff; background:var(--primary); padding:1px 4px; border-radius:2px; z-index:2; opacity:0.7; pointer-events:none; }
+.preview-page { margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+.clickable { cursor:pointer; transition:background 0.15s; }
+.clickable:active { background:rgba(79,70,229,0.12) !important; }
+.bottom-bar { position:fixed; bottom:0; left:0; right:0; background:var(--card); padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px)); box-shadow:0 -2px 10px rgba(0,0,0,0.06); display:flex; gap:10px; z-index:999; }
+.bottom-bar .btn { flex:1; }
+.modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; display:flex; align-items:center; justify-content:center; padding:20px; }
+.modal-content { background:var(--card); border-radius:14px; padding:20px; width:100%; max-width:400px; box-shadow:0 8px 30px rgba(0,0,0,0.2); }
+.modal-title { font-size:16px; font-weight:600; margin-bottom:12px; }
+.modal-input { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#FAFAFA; color:var(--text); margin-bottom:4px; }
+.modal-textarea { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:13px; background:#FAFAFA; resize:vertical; font-family:monospace; color:var(--text); min-height:80px; }
+.modal-btns { display:flex; gap:10px; margin-top:14px; }
+.modal-btns .btn { flex:1; }
+.toast { position:fixed; top:120px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 24px; border-radius:10px; font-size:14px; z-index:3000; opacity:0; transition:opacity 0.3s; pointer-events:none; max-width:80vw; text-align:center; }
+.toast.show { opacity:1; }
+#printArea { display:none; }
+/* ===== 列印框架（框線/尺寸固定，禁止修改） ===== */
+.a4-page { width:210mm; min-height:297mm; background:#ffffff; margin:0 auto; padding:0mm; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:0mm; }
+.a6-form { width:105mm; height:148mm; padding:4mm; overflow:hidden; }
+.work-table { width:100%; height:100%; border-collapse:collapse; border:1.6px solid #000; writing-mode:horizontal-tb; }
+.work-table td { border:1.6px solid #000; padding:3mm; vertical-align:middle; font-weight:bold; font-size:var(--base-font); writing-mode:horizontal-tb; }
+.work-table td.label-col { text-align:center; vertical-align:middle; width:18%; font-size:var(--label-font); writing-mode:horizontal-tb; }
+.work-table td.data-cell { text-align:left; font-size:var(--content-font); overflow:hidden; writing-mode:horizontal-tb; }
+.work-table tr:nth-child(1) td { text-align:center; }
+.work-table tr:nth-child(2) td:nth-child(2) { width:42%; }
+.work-table tr:nth-child(2) td:nth-child(3) { width:18%; }
+.work-table tr:nth-child(2) td:nth-child(4) { width:22%; }
+.work-table tr:nth-child(6) td.data-cell { font-size:var(--remark-font); line-height:1.3; }
 @media print {
-    /* 隱藏控制面板 */
-    .control-panel {
-        display: none !important;
-    }
-    body {
-        background: #fff;
-        padding: 0;
-    }
-    /* 強制A4直式、禁止瀏覽器自動縮放 */
-    @page {
-        size: A4 portrait;
-        margin: 10mm;
-    }
-    .a4-page {
-        width: 100%;
-        height: 100%;
-        padding: 0;
-    }
+    .nav-bar,.bottom-bar,.toast,.main,.modal-overlay { display:none !important; }
+    #printArea { display:block !important; }
+    body { background:#fff; padding:0; margin:0; overflow:hidden; }
+    @page { size:A4 portrait; margin:0mm; }
+    .a4-page { width:210mm; height:297mm; padding:0; zoom:0.85; overflow:hidden; page-break-after:always; page-break-inside:avoid; }
+    .a4-page:last-child { page-break-after:avoid; }
+    .preview-page { margin:0; box-shadow:none; }
 }
 </style>
 </head>
 <body>
-<!-- 操作控制面板 -->
-<div class="control-panel">
-    <div class="setting-row">
-        <div class="setting-item">
-            <label>全域基礎字型(px)：</label>
-            <input type="number" id="baseFont" value="15" min="10" max="30">
-        </div>
-        <div class="setting-item">
-            <label>標籤字型(px)：</label>
-            <input type="number" id="labelFont" value="15" min="10" max="30">
-        </div>
-        <div class="setting-item">
-            <label>內容字型(px)：</label>
-            <input type="number" id="contentFont" value="15" min="10" max="30">
-        </div>
-    </div>
-    <h3>批次匯入｜一行=一筆，格式：庫別,日期,線別,M/O,機種,套數,備註,儲位</h3>
-    <textarea id="inputText" rows="5" placeholder="範例：
-W131,8/4,S07,48732467,UT3,50,R48.0G334.001A,G1RB0711"></textarea>
-    <div class="btn-group">
-        <button onclick="batchLoad()">批次載入資料</button>
-        <button class="secondary" onclick="clearAll()">清空全部工單</button>
-        <button onclick="window.print()">🖨️ 列印表單</button>
+
+<!-- ===== 導航欄 ===== -->
+<div class="nav-bar">
+    <div class="status-bar"></div>
+    <div class="nav-content">
+        <button class="nav-btn" onclick="window.print()">🖨️ 列印</button>
+        <div class="nav-title">MO小卡</div>
     </div>
 </div>
 
-<!-- A4紙張容器，內含2×2共4張A6表單 -->
-<div class="a4-page">
-    <div class="a6-form" id="form1"></div>
-    <div class="a6-form" id="form2"></div>
-    <div class="a6-form" id="form3"></div>
-    <div class="a6-form" id="form4"></div>
+<!-- ===== 主內容 ===== -->
+<div class="main">
+
+    <!-- 📥 批次匯入 -->
+    <div class="card">
+        <div class="card-title">📥 批次匯入</div>
+        <div class="card-hint">一行=一筆，開頭為筆數編號，無上限
+格式：編號,類型,庫別,日期,線別,M/O,機種,數量,料號
+多料號用逗號分隔，例如：
+1,PR,W131,8/4,S07,48732467,UT3,850,R48.0G334.001A,R48.0G334.001B
+2,MP,W101,8/5,S08,48732468,UT4,30,R48.0G334.002B</div>
+        <textarea id="inputText" rows="5" placeholder="1,PR,W131,8/4,S07,48732467,UT3,850,R48.0G334.001A&#10;2,MP,W101,8/5,S08,48732468,UT4,30,R48.0G334.002B"></textarea>
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="app.batchLoad()">批次載入</button>
+            <button class="btn btn-secondary" onclick="app.clearAll()">清空全部</button>
+        </div>
+        <div id="entryList"></div>
+    </div>
+
+    <!-- 📝 備註字型設定 -->
+    <div class="card">
+        <div class="card-title">📝 備註字型設定</div>
+        <div class="form-row">
+            <label>字型大小</label>
+            <input type="range" id="remarkFontSlider" min="12" max="30" value="20" step="1">
+            <span class="val-label" id="remarkFontVal">20px</span>
+        </div>
+        <div class="card-hint">資料較多時可調小字型，避免塞不下（其他欄位固定30px不變）</div>
+    </div>
+
+    <!-- 📄 預覽 -->
+    <div class="card">
+        <div class="card-title">📄 預覽（點擊格子可編輯）</div>
+        <div class="preview-summary" id="previewSummary"></div>
+        <div class="preview-wrapper" id="previewWrapper">
+            <div class="preview-scaler" id="previewScaler"></div>
+        </div>
+    </div>
+
 </div>
+
+<!-- ===== 隱藏列印區 ===== -->
+<div id="printArea"></div>
+
+<!-- ===== 底部操作欄 ===== -->
+<div class="bottom-bar">
+    <button class="btn btn-primary" onclick="window.print()">🖨️ 列印表單</button>
+    <button class="btn btn-danger" onclick="app.clearAll()">🗑️ 清空全部</button>
+</div>
+
+<!-- ===== 編格編輯 Modal ===== -->
+<div class="modal-overlay" id="editModal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-title" id="editModalTitle">編輯</div>
+        <input type="text" class="modal-input" id="editModalInput">
+        <textarea class="modal-textarea" id="editModalTextarea" style="display:none;"></textarea>
+        <div class="modal-btns">
+            <button class="btn btn-secondary" onclick="app.closeEditModal()">取消</button>
+            <button class="btn btn-primary" onclick="app.confirmEdit()">確認</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast"></div>
 
 <script>
-//字型變數
-const fontSetting = {
-    base:15,
-    label:15,
-    content:15
-};
-//4組工單資料
-let formData = [null,null,null,null];
-
-//套用字型
-function applyFont(){
-    document.documentElement.style.setProperty('--base-font', fontSetting.base+'px');
-    document.documentElement.style.setProperty('--label-font', fontSetting.label+'px');
-    document.documentElement.style.setProperty('--content-font', fontSetting.content+'px');
-}
-
-//單張工單模板【版型完全固定，不做任何結構修改】
-function getTemplate(data){
-    if(!data) data={date:"",line:"",mo:"",model:"",qty:"",remark:""};
-    return `
-<table class="work-table">
-    <tr>
-        <td class="label-col">日　期</td>
-        <td class="data-cell">${data.date}</td>
-        <td class="label-col">線　別</td>
-        <td class="data-cell">${data.line}</td>
-    </tr>
-    <tr>
-        <td class="label-col">M/O</td>
-        <td class="data-cell" colspan="3">${data.mo}</td>
-    </tr>
-    <tr>
-        <td class="label-col">機　種</td>
-        <td class="data-cell" colspan="3">${data.model}</td>
-    </tr>
-    <tr>
-        <td class="label-col">套　數</td>
-        <td class="data-cell" colspan="3">${data.qty}</td>
-    </tr>
-    <tr>
-        <td class="label-col">備　註</td>
-        <td class="data-cell" colspan="3">${data.remark}</td>
-    </tr>
-</table>`;
-}
-
-//重新渲染4張表單
-function renderAll(){
-    const list = [
-        document.getElementById('form1'),
-        document.getElementById('form2'),
-        document.getElementById('form3'),
-        document.getElementById('form4')
-    ];
-    for(let i=0;i<4;i++){
-        list[i].innerHTML = getTemplate(formData[i]);
+/**
+ * MO小卡 - 工單列印系統
+ * 列印框架（框線1.6px、A6 105mm×148mm、A4 210mm×297mm）固定不可修改
+ * 表格6列：類型/庫別 → 日期/線別 → M/O → 機種 → 套數 → 備註
+ * 標籤文字橫向置中，列印縮放85%，每頁不溢出
+ * 批次格式：編號,類型,庫別,日期,線別,M/O,機種,數量,料號1,料號2,...
+ * 套數拆分+多行備註整合至每筆entry card
+ * 無上限筆數，多筆自動分頁A4
+ */
+class App {
+    constructor() {
+        /* 字型設定 */
+        this.fontSetting = { base: 30, label: 30, content: 30 };
+        this.remarkFontSize = 20;
+        /* 工單資料（動態陣列，無上限） */
+        this.entries = [];
+        /* 欄位中文標籤 */
+        this.fieldLabels = {
+            type: '類型', warehouse: '庫別',
+            date: '日期', line: '線別',
+            mo: 'M/O', model: '機種',
+            qty: '套數', remark: '備註'
+        };
+        /* 編輯暫存 */
+        this._editCardIdx = -1;
+        this._editField = '';
+        this._toastTimer = null;
     }
-}
 
-//批次載入
-function batchLoad(){
-    const text = document.getElementById('inputText').value.trim();
-    if(!text){
-        alert("請填入資料！");
-        return;
+    /** 初始化應用 */
+    init() {
+        this.applyFont();
+        this.bindEvents();
+        this.refreshAll();
     }
-    const rows = text.split(/\r?\n/).filter(r=>r.trim()!=='');
-    formData = [null,null,null,null];
-    for(let i=0;i<rows.length;i++){
-        if(i>=4){
-            alert("最多支援4筆，多餘資料忽略");
-            break;
+
+    /** 套用字型CSS變數 */
+    applyFont() {
+        const r = document.documentElement.style;
+        r.setProperty('--base-font', this.fontSetting.base + 'px');
+        r.setProperty('--label-font', this.fontSetting.label + 'px');
+        r.setProperty('--content-font', this.fontSetting.content + 'px');
+        r.setProperty('--remark-font', this.remarkFontSize + 'px');
+    }
+
+    /** 綁定事件 */
+    bindEvents() {
+        /* 備註字型滑桿 */
+        const slider = document.getElementById('remarkFontSlider');
+        const valLabel = document.getElementById('remarkFontVal');
+        slider.addEventListener('input', () => {
+            this.remarkFontSize = parseInt(slider.value, 10);
+            valLabel.textContent = this.remarkFontSize + 'px';
+            this.applyFont();
+        });
+
+        /* 預覽區點擊代理 */
+        document.getElementById('previewScaler').addEventListener('click', (e) => {
+            const cell = e.target.closest('.clickable');
+            if (cell) {
+                const ci = parseInt(cell.dataset.card, 10);
+                const field = cell.dataset.field;
+                if (!isNaN(ci) && field) {
+                    this.showEditModal(ci, field);
+                }
+            }
+        });
+
+        /* 視窗縮放→重算預覽縮放 */
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => this.renderPreview(), 150);
+        });
+    }
+
+    /**
+     * 解析單行資料
+     * 格式：編號,類型,庫別,日期,線別,M/O,機種,數量,料號1,料號2,...
+     */
+    parseLine(line) {
+        const arr = line.split(',').map(s => s.trim());
+        if (arr.length < 9) {
+            throw new Error('欄位不足，至少需9個欄位');
         }
-        const arr = rows[i].split(',');
-        if(arr.length!==8){
-            alert(`第${i+1}行欄位錯誤，需8個欄位`);
-            return;
+        const entryNum = parseInt(arr[0], 10);
+        if (isNaN(entryNum)) {
+            throw new Error('編號格式錯誤：' + arr[0]);
         }
-        formData[i]={
-            date:arr[1].trim(),
-            line:arr[2].trim(),
-            mo:arr[3].trim(),
-            model:arr[4].trim(),
-            qty:arr[5].trim(),
-            remark:arr[6].trim()
+        const partNumbers = arr.slice(8).filter(s => s !== '');
+        return {
+            entryNum: entryNum,
+            type: arr[1],
+            warehouse: arr[2],
+            date: arr[3],
+            line: arr[4],
+            mo: arr[5],
+            model: arr[6],
+            qty: arr[7],
+            partNumbers: partNumbers,
+            remark: partNumbers.join(', '),
+            splitOpen: false,
+            splitCount: 2,
+            splitRule: 'average',
+            manualSplit: '',
+            remarkOpen: false,
+            multiRemarkText: ''
         };
     }
-    renderAll();
-    document.getElementById('inputText').value='';
-    alert(`成功載入${Math.min(rows.length,4)}筆`);
+
+    /** 批次載入（不清空textarea） */
+    batchLoad() {
+        try {
+            const text = document.getElementById('inputText').value.trim();
+            if (!text) {
+                this.showToast('請填入資料！');
+                return;
+            }
+
+            const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+            let loadedCount = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                try {
+                    const entry = this.parseLine(lines[i].trim());
+                    /* 同編號覆蓋（保留toggle狀態），否則新增 */
+                    const existingIdx = this.entries.findIndex(e => e.entryNum === entry.entryNum);
+                    if (existingIdx >= 0) {
+                        const old = this.entries[existingIdx];
+                        entry.splitOpen = old.splitOpen;
+                        entry.splitCount = old.splitCount;
+                        entry.splitRule = old.splitRule;
+                        entry.manualSplit = old.manualSplit;
+                        entry.remarkOpen = old.remarkOpen;
+                        entry.multiRemarkText = old.multiRemarkText;
+                        if (old.remarkOpen) {
+                            entry.remark = old.remark;
+                        }
+                        this.entries[existingIdx] = entry;
+                    } else {
+                        this.entries.push(entry);
+                    }
+                    loadedCount++;
+                } catch (e) {
+                    this.showToast('第' + (i + 1) + '行錯誤：' + e.message);
+                    return;
+                }
+            }
+
+            this.refreshAll();
+            this.showToast('成功載入 ' + loadedCount + ' 筆');
+        } catch (e) {
+            console.error('批次載入錯誤:', e);
+            this.showToast('載入失敗：' + e.message);
+        }
+    }
+
+    /**
+     * 平均拆分演算法
+     * 規則：四捨五入到最近的50（若<50則取10），恰在中間時向下取
+     * 範例：850/3→300,300,250  650/2→300,350  420/2→200,220
+     */
+    calculateAverageSplit(total, count) {
+        if (count <= 1) return [total];
+        if (total <= 0) return new Array(count).fill(0);
+
+        total = Math.floor(total);
+        let avg = total / count;
+
+        /* 決定取整步進值 */
+        let step = 50;
+        if (avg < 50) step = 10;
+
+        /* 四捨五入到最近step（恰在中間時向下取） */
+        let base = Math.floor(avg / step);
+        let remainder = avg - base * step;
+        if (remainder > step / 2) base++;
+        let niceNum = base * step;
+        if (niceNum === 0) niceNum = step;
+
+        /* 前面count-1張放niceNum，最後一張放餘數 */
+        let result = [];
+        let sum = 0;
+        for (let i = 0; i < count - 1; i++) {
+            result.push(niceNum);
+            sum += niceNum;
+        }
+        let last = total - sum;
+        result.push(last);
+
+        /* 若餘數<=0，逐步減少niceNum重試 */
+        while (last <= 0 && niceNum > step) {
+            niceNum -= step;
+            result = [];
+            sum = 0;
+            for (let i = 0; i < count - 1; i++) {
+                result.push(niceNum);
+                sum += niceNum;
+            }
+            last = total - sum;
+            result.push(last);
+        }
+
+        /* 最終兜底：簡單整除 */
+        if (last <= 0) {
+            let baseQty = Math.floor(total / count);
+            let extra = total - baseQty * count;
+            result = [];
+            for (let i = 0; i < count; i++) {
+                result.push(baseQty + (i < extra ? 1 : 0));
+            }
+        }
+
+        return result;
+    }
+
+    /** 取得某筆的拆分數量陣列 */
+    getSplitQtys(entry) {
+        const total = Number(entry.qty) || 0;
+        const count = Math.max(entry.splitCount, 1);
+
+        if (entry.splitRule === 'average') {
+            return this.calculateAverageSplit(total, count);
+        } else {
+            const parts = entry.manualSplit.split(',').map(s => {
+                let n = Number(s.trim());
+                return isNaN(n) ? 0 : n;
+            });
+            while (parts.length < count) parts.push(0);
+            return parts.slice(0, count);
+        }
+    }
+
+    /**
+     * 從entries生成卡片陣列
+     * 拆分中的entry展開為多張卡片，套數顯示「原量/拆分量」
+     */
+    generateCards() {
+        let cards = [];
+        for (let entry of this.entries) {
+            if (entry.splitOpen) {
+                const qtys = this.getSplitQtys(entry);
+                const originalQty = entry.qty;
+                for (let q of qtys) {
+                    cards.push({
+                        ...entry,
+                        qty: originalQty + '/' + q
+                    });
+                }
+            } else {
+                cards.push({ ...entry });
+            }
+        }
+        return cards;
+    }
+
+    /**
+     * 工單表格模板（6列）
+     * 列1：類型 | 庫別（文字置中）
+     * 列2：日期 | 線別（標籤橫向置中）
+     * 列3：M/O
+     * 列4：機種（標籤橫向置中）
+     * 列5：套數（標籤橫向置中）
+     * 列6：備註（標籤橫向置中，字型可調）
+     */
+    getTemplate(data, cardIdx, interactive) {
+        if (!data) {
+            data = { type: '', warehouse: '', date: '', line: '', mo: '', model: '', qty: '', remark: '' };
+        }
+        const remarkHtml = (data.remark || '').replace(/\n/g, '<br>');
+
+        const dc = (field, extra) => {
+            let cls = 'data-cell';
+            if (interactive) cls += ' clickable';
+            let attr = 'class="' + cls + '"';
+            if (interactive) {
+                attr += ' data-card="' + cardIdx + '" data-field="' + field + '"';
+            }
+            if (extra) attr += ' ' + extra;
+            return attr;
+        };
+
+        return '<table class="work-table">' +
+            '<tr><td ' + dc('type', 'colspan="2"') + '>' + (data.type || '') + '</td>' +
+                '<td ' + dc('warehouse', 'colspan="2"') + '>' + (data.warehouse || '') + '</td></tr>' +
+            '<tr><td class="label-col">日期</td>' +
+                '<td ' + dc('date') + '>' + (data.date || '') + '</td>' +
+                '<td class="label-col">線別</td>' +
+                '<td ' + dc('line') + '>' + (data.line || '') + '</td></tr>' +
+            '<tr><td class="label-col">M/O</td>' +
+                '<td ' + dc('mo', 'colspan="3"') + '>' + (data.mo || '') + '</td></tr>' +
+            '<tr><td class="label-col">機種</td>' +
+                '<td ' + dc('model', 'colspan="3"') + '>' + (data.model || '') + '</td></tr>' +
+            '<tr><td class="label-col">套數</td>' +
+                '<td ' + dc('qty', 'colspan="3"') + '>' + (data.qty || '') + '</td></tr>' +
+            '<tr><td class="label-col">備註</td>' +
+                '<td ' + dc('remark', 'colspan="3"') + '>' + remarkHtml + '</td></tr>' +
+            '</table>';
+    }
+
+    /** 渲染列印區（多頁A4） */
+    renderAll() {
+        const cards = this.generateCards();
+        const printArea = document.getElementById('printArea');
+        const pageCount = Math.max(1, Math.ceil(cards.length / 4));
+
+        let html = '';
+        for (let p = 0; p < pageCount; p++) {
+            html += '<div class="a4-page">';
+            for (let i = 0; i < 4; i++) {
+                const cardIdx = p * 4 + i;
+                if (cardIdx < cards.length) {
+                    html += '<div class="a6-form">' + this.getTemplate(cards[cardIdx], cardIdx, false) + '</div>';
+                } else {
+                    html += '<div class="a6-form"></div>';
+                }
+            }
+            html += '</div>';
+        }
+        printArea.innerHTML = html;
+    }
+
+    /** 渲染每筆entry card（含拆分/備註toggle） */
+    renderEntryList() {
+        const container = document.getElementById('entryList');
+        if (this.entries.length === 0) {
+            container.innerHTML = '<div class="entry-empty">尚無資料，請先批次載入</div>';
+            return;
+        }
+
+        let html = '';
+        for (let i = 0; i < this.entries.length; i++) {
+            const e = this.entries[i];
+            const num = e.entryNum;
+
+            html += '<div class="entry-card" id="entry-card-' + i + '">';
+            html += '<div class="entry-header">';
+            html += '<span class="entry-num">第' + num + '筆</span>';
+            html += '<span class="entry-info">' + e.type + ' | ' + e.warehouse + ' | ' + e.date + ' | ' + e.line + '</span>';
+            html += '<button class="btn-del" onclick="app.removeEntry(' + i + ')">✕</button>';
+            html += '</div>';
+            html += '<div class="entry-detail">M/O: ' + e.mo + '　機種: ' + e.model + '　套數: ' + e.qty + '</div>';
+            html += '<div class="entry-detail">料號: ' + e.partNumbers.join(', ') + '</div>';
+
+            /* 拆分/備註toggle */
+            html += '<div class="entry-toggles">';
+            html += '<div class="toggle-row"><span class="toggle-label">套數拆分</span>';
+            html += '<label class="toggle-switch"><input type="checkbox"' + (e.splitOpen ? ' checked' : '') + ' onchange="app.toggleEntrySplit(' + i + ',this.checked)"><span class="toggle-slider"></span></label></div>';
+            html += '<div class="toggle-row"><span class="toggle-label">多行備註</span>';
+            html += '<label class="toggle-switch"><input type="checkbox"' + (e.remarkOpen ? ' checked' : '') + ' onchange="app.toggleEntryRemark(' + i + ',this.checked)"><span class="toggle-slider"></span></label></div>';
+            html += '</div>';
+
+            /* 拆分展開區 */
+            if (e.splitOpen) {
+                const qtys = this.getSplitQtys(e);
+                html += '<div class="entry-section">';
+                html += '<div class="form-row"><label>拆分份數</label>';
+                html += '<input type="number" value="' + e.splitCount + '" min="1" max="50" oninput="app.updateSplitCount(' + i + ',this.value)"></div>';
+                html += '<div class="form-row"><label>拆分規則</label>';
+                html += '<select onchange="app.updateSplitRule(' + i + ',this.value)">';
+                html += '<option value="average"' + (e.splitRule === 'average' ? ' selected' : '') + '>平均分配</option>';
+                html += '<option value="manual"' + (e.splitRule === 'manual' ? ' selected' : '') + '>手動輸入</option>';
+                html += '</select></div>';
+                html += '<div class="form-row" id="manual-row-' + i + '" style="display:' + (e.splitRule === 'manual' ? 'flex' : 'none') + '"><label>每張數量</label>';
+                html += '<input type="text" value="' + e.manualSplit + '" placeholder="300,300,250" oninput="app.updateManualSplit(' + i + ',this.value)"></div>';
+                html += '<div class="split-preview" id="split-preview-' + i + '">拆分結果：' + qtys.join(', ') + '（共' + qtys.length + '張）</div>';
+                html += '</div>';
+            }
+
+            /* 備註展開區 */
+            if (e.remarkOpen) {
+                html += '<div class="entry-section">';
+                html += '<textarea rows="4" placeholder="數量  /  料號" oninput="app.updateMultiRemark(' + i + ',this.value)">' + (e.multiRemarkText || e.remark) + '</textarea>';
+                html += '</div>';
+            }
+
+            html += '</div>';
+        }
+
+        container.innerHTML = html;
+    }
+
+    /** 渲染預覽區（縮放A4頁面，data-cell可點擊） */
+    renderPreview() {
+        const cards = this.generateCards();
+        const scaler = document.getElementById('previewScaler');
+        const summary = document.getElementById('previewSummary');
+        const wrapper = document.getElementById('previewWrapper');
+
+        if (cards.length === 0) {
+            summary.innerHTML = '';
+            scaler.innerHTML = '<div class="entry-empty">尚無資料，請先批次載入</div>';
+            wrapper.style.height = 'auto';
+            return;
+        }
+
+        const pageCount = Math.ceil(cards.length / 4);
+        summary.innerHTML = '共 ' + this.entries.length + ' 筆工單，生成 ' + cards.length + ' 張卡片，' + pageCount + ' 頁A4';
+
+        let html = '';
+        for (let p = 0; p < pageCount; p++) {
+            html += '<div class="a4-page preview-page">';
+            for (let i = 0; i < 4; i++) {
+                const cardIdx = p * 4 + i;
+                html += '<div class="a6-form">';
+                if (cardIdx < cards.length) {
+                    html += '<span class="form-badge">' + (cardIdx + 1) + '</span>';
+                    html += this.getTemplate(cards[cardIdx], cardIdx, true);
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        scaler.innerHTML = html;
+
+        /* 計算縮放比 */
+        const a4WidthPx = 210 * 3.7795275591;
+        const availWidth = Math.min(window.innerWidth - 48, 560);
+        const scale = availWidth / a4WidthPx;
+        scaler.style.transform = 'scale(' + scale + ')';
+
+        /* 計算容器高度 */
+        const a4HeightPx = 297 * 3.7795275591;
+        const gap = 16;
+        const totalHeight = (a4HeightPx * pageCount + gap * (pageCount - 1)) * scale;
+        wrapper.style.height = Math.ceil(totalHeight) + 'px';
+    }
+
+    /** 切換某筆拆分開關 */
+    toggleEntrySplit(idx, checked) {
+        this.entries[idx].splitOpen = checked;
+        this.refreshAll();
+    }
+
+    /** 切換某筆備註開關 */
+    toggleEntryRemark(idx, checked) {
+        const e = this.entries[idx];
+        e.remarkOpen = checked;
+        if (checked) {
+            /* 預填多行備註格式：數量  /  料號 */
+            if (e.partNumbers.length > 0) {
+                let text = '';
+                for (let pn of e.partNumbers) {
+                    text += '數量  /  ' + pn + '\n';
+                }
+                e.multiRemarkText = text.trim();
+                e.remark = e.multiRemarkText;
+            }
+        } else {
+            /* 還原原始料號 */
+            e.remark = e.partNumbers.join(', ');
+            e.multiRemarkText = '';
+        }
+        this.refreshAll();
+    }
+
+    /** 更新拆分份數（不重渲染entryList以保留焦點） */
+    updateSplitCount(idx, value) {
+        this.entries[idx].splitCount = Math.max(Number(value) || 1, 1);
+        this.updateSplitPreviewText(idx);
+        this.renderAll();
+        this.renderPreview();
+    }
+
+    /** 更新拆分規則 */
+    updateSplitRule(idx, value) {
+        this.entries[idx].splitRule = value;
+        const manualRow = document.getElementById('manual-row-' + idx);
+        if (manualRow) {
+            manualRow.style.display = value === 'manual' ? 'flex' : 'none';
+        }
+        this.updateSplitPreviewText(idx);
+        this.renderAll();
+        this.renderPreview();
+    }
+
+    /** 更新手動拆分值 */
+    updateManualSplit(idx, value) {
+        this.entries[idx].manualSplit = value;
+        this.updateSplitPreviewText(idx);
+        this.renderAll();
+        this.renderPreview();
+    }
+
+    /** 更新拆分預覽文字 */
+    updateSplitPreviewText(idx) {
+        const el = document.getElementById('split-preview-' + idx);
+        if (el) {
+            const qtys = this.getSplitQtys(this.entries[idx]);
+            el.textContent = '拆分結果：' + qtys.join(', ') + '（共' + qtys.length + '張）';
+        }
+    }
+
+    /** 更新多行備註（不重渲染entryList以保留焦點） */
+    updateMultiRemark(idx, value) {
+        this.entries[idx].multiRemarkText = value;
+        this.entries[idx].remark = value;
+        this.renderAll();
+        this.renderPreview();
+    }
+
+    /** 刪除某筆 */
+    removeEntry(idx) {
+        const num = this.entries[idx].entryNum;
+        this.entries.splice(idx, 1);
+        this.refreshAll();
+        this.showToast('已刪除第' + num + '筆');
+    }
+
+    /** 顯示編輯Modal */
+    showEditModal(cardIdx, field) {
+        const cards = this.generateCards();
+        const data = cards[cardIdx] || {};
+        const value = data[field] || '';
+        const label = this.fieldLabels[field] || field;
+
+        document.getElementById('editModalTitle').textContent = '卡片' + (cardIdx + 1) + ' - ' + label;
+
+        const input = document.getElementById('editModalInput');
+        const textarea = document.getElementById('editModalTextarea');
+
+        if (field === 'remark') {
+            input.style.display = 'none';
+            textarea.style.display = 'block';
+            textarea.value = value;
+        } else {
+            input.style.display = 'block';
+            textarea.style.display = 'none';
+            input.value = value;
+        }
+
+        this._editCardIdx = cardIdx;
+        this._editField = field;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    /** 關閉編輯Modal */
+    closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    /** 確認編輯 */
+    confirmEdit() {
+        const field = this._editField;
+        const cardIdx = this._editCardIdx;
+        let value;
+
+        if (field === 'remark') {
+            value = document.getElementById('editModalTextarea').value;
+        } else {
+            value = document.getElementById('editModalInput').value;
+        }
+
+        /* 找到對應的entry和split索引 */
+        let cardCount = 0;
+        for (let i = 0; i < this.entries.length; i++) {
+            const e = this.entries[i];
+            const numCards = e.splitOpen ? this.getSplitQtys(e).length : 1;
+
+            if (cardIdx >= cardCount && cardIdx < cardCount + numCards) {
+                const splitIdx = cardIdx - cardCount;
+
+                if (field === 'qty' && e.splitOpen) {
+                    /* 拆分卡片：更新特定拆分數量 */
+                    let qtys = this.getSplitQtys(e);
+                    if (splitIdx < qtys.length) {
+                        let newQty = value;
+                        if (value.includes('/')) {
+                            const parts = value.split('/');
+                            newQty = parts[parts.length - 1].trim();
+                        }
+                        qtys[splitIdx] = Number(newQty) || 0;
+                        e.splitRule = 'manual';
+                        e.manualSplit = qtys.join(',');
+                    }
+                } else {
+                    /* 非拆分qty或非qty欄位：直接更新entry */
+                    e[field] = value;
+                }
+                break;
+            }
+            cardCount += numCards;
+        }
+
+        this.closeEditModal();
+        this.refreshAll();
+        this.showToast('已更新');
+    }
+
+    /** 清空全部 */
+    clearAll() {
+        this.entries = [];
+        document.getElementById('inputText').value = '';
+        this.refreshAll();
+        this.showToast('已清空全部');
+    }
+
+    /** 統一刷新所有渲染 */
+    refreshAll() {
+        this.renderAll();
+        this.renderEntryList();
+        this.renderPreview();
+    }
+
+    /** Toast提示 */
+    showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2500);
+    }
 }
 
-//清空
-function clearAll(){
-    formData=[null,null,null,null];
-    document.getElementById('inputText').value='';
-    renderAll();
-}
-
-//字型監聽
-document.getElementById('baseFont').addEventListener('input',e=>{
-    fontSetting.base=Number(e.target.value);
-    applyFont();
+/* ===== 初始化 ===== */
+const app = new App();
+document.addEventListener('DOMContentLoaded', () => {
+    app.init();
 });
-document.getElementById('labelFont').addEventListener('input',e=>{
-    fontSetting.label=Number(e.target.value);
-    applyFont();
-});
-document.getElementById('contentFont').addEventListener('input',e=>{
-    fontSetting.content=Number(e.target.value);
-    applyFont();
-});
-
-//初始化
-applyFont();
-renderAll();
 </script>
 </body>
 </html>
