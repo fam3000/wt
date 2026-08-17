@@ -204,7 +204,7 @@ class App {
             mo: 'M/O', model: '機種',
             qty: '套數', remark: '備註'
         };
-        /* 編輯暫存 */
+        /* 跨輯暫存 */
         this._editCardIdx = -1;
         this._editField = '';
         this._toastTimer = null;
@@ -283,7 +283,8 @@ class App {
             partNumbers: partNumbers,
             remark: partNumbers.join(', '),
             splitOpen: false,
-            splitCount: 2,
+            splitCount: Number(arr[7]) === 850 ? 3 : 2,
+            splitCountTouched: false,
             splitRule: 'average',
             manualSplit: '',
             remarkOpen: false,
@@ -312,6 +313,7 @@ class App {
                         const old = this.entries[existingIdx];
                         entry.splitOpen = old.splitOpen;
                         entry.splitCount = old.splitCount;
+                        entry.splitCountTouched = old.splitCountTouched;
                         entry.splitRule = old.splitRule;
                         entry.manualSplit = old.manualSplit;
                         entry.remarkOpen = old.remarkOpen;
@@ -611,7 +613,12 @@ class App {
 
     /** 切換某筆拆分開關 */
     toggleEntrySplit(idx, checked) {
-        this.entries[idx].splitOpen = checked;
+        const e = this.entries[idx];
+        e.splitOpen = checked;
+        /* 數量850開啟拆分時，若份數未被手動調整過，自動設為初始3份 */
+        if (checked && Number(e.qty) === 850 && !e.splitCountTouched) {
+            e.splitCount = 3;
+        }
         this.refreshAll();
     }
 
@@ -639,7 +646,9 @@ class App {
 
     /** 更新拆分份數（不重渲染entryList以保留焦點） */
     updateSplitCount(idx, value) {
-        this.entries[idx].splitCount = Math.max(Number(value) || 1, 1);
+        const e = this.entries[idx];
+        e.splitCount = Math.max(Number(value) || 1, 1);
+        e.splitCountTouched = true;
         this.updateSplitPreviewText(idx);
         this.renderAll();
         this.renderPreview();
@@ -770,7 +779,7 @@ class App {
         this.showToast('已更新');
     }
 
-%    /** 清%6清F#9D清空全部 */
+    /** 清空全部 */
     clearAll() {
         this.entries = [];
         document.getElementById('inputText').value = '';
