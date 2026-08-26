@@ -141,17 +141,16 @@ button{
 
     <div class="card">
         <div class="mode-wrap">
-            <button id="mode1" class="mode-btn mode-active">模式A：逗號 → Excel多格（Tab分隔）</button>
+            <button id="mode3" class="mode-btn mode-active">模式C：Excel多格→逗號+補序號+字段重排</button>
             <button id="mode2" class="mode-btn btn-gray">模式B：Excel多格 → 逗號格式</button>
-            <button id="mode3" class="mode-btn btn-gray">模式C：固定字段順序重排</button>
+            <button id="mode1" class="mode-btn btn-gray">模式A：逗號 → Excel多格（Tab分隔）</button>
         </div>
         <div class="title-row">
             <h2>輸入區</h2>
         </div>
-        <textarea id="inputArea" placeholder="貼入資料範例：
-1.PR,W131,8/4,S07,48732467,UT3,850,R48.0G334.001A
-2.WE,W131,8/4,S07,48732468,UT3,50,R48.0G334.001A
-模式C範例：1,2026/8/31,MP,W101,S05,548.0B908.0011,B2026082600593,V10000551110,DGX,18"></textarea>
+        <textarea id="inputArea" placeholder="貼入Excel多格範例：
+2026/8/31	MP	W101	S05	548.0B908.0011	B2026082600593	V10000551110	DGX	18
+2026/9/1	MP	W102	S06	548.0B908.0012	B2026082600594	V10000551111	DGX	19"></textarea>
         <div class="btn-row">
             <button class="btn-primary" onclick="convert()">開始轉換</button>
             <button class="btn-gray" onclick="clearAll()">清空全部</button>
@@ -164,7 +163,7 @@ button{
             <button class="btn-primary" onclick="copyResult()">一鍵複製結果</button>
         </div>
         <textarea id="outputArea" readonly placeholder="轉換後內容會顯示於此..."></textarea>
-        <div class="tip" id="tipText">模式A複製直接貼Excel，自動拆分每一欄到獨立儲存格</div>
+        <div class="tip" id="tipText">模式C：自動補流水號、日期去年份、重排字段、互換最後兩欄</div>
     </div>
 </div>
 
@@ -176,39 +175,37 @@ const outputDom = document.getElementById('outputArea');
 const toastDom = document.getElementById('toast');
 const tipTextDom = document.getElementById('tipText');
 
-let currentMode = 1; //1=逗號轉Tab(Excel), 2=Excel轉逗號,3=固定字段重排
+let currentMode = 3;
 
 // 模式切換
-document.getElementById('mode1').onclick = ()=>{
-    currentMode=1;
-    document.getElementById('mode1').classList.add('mode-active');
+document.getElementById('mode3').onclick = ()=>{
+    currentMode=3;
+    document.getElementById('mode3').classList.add('mode-active');
     document.getElementById('mode2').classList.remove('mode-active');
-    document.getElementById('mode3').classList.remove('mode-active');
-    tipTextDom.innerText = '模式A複製直接貼Excel，自動拆分每一欄到獨立儲存格';
+    document.getElementById('mode1').classList.remove('mode-active');
+    tipTextDom.innerText = '模式C：自動補流水號、日期去年份、重排字段、互換最後兩欄';
 }
 document.getElementById('mode2').onclick = ()=>{
     currentMode=2;
     document.getElementById('mode2').classList.add('mode-active');
-    document.getElementById('mode1').classList.remove('mode-active');
     document.getElementById('mode3').classList.remove('mode-active');
+    document.getElementById('mode1').classList.remove('mode-active');
     tipTextDom.innerText = '模式B：Excel貼上進來，輸出標準逗號分隔文字';
 }
-document.getElementById('mode3').onclick = ()=>{
-    currentMode=3;
-    document.getElementById('mode3').classList.add('mode-active');
-    document.getElementById('mode1').classList.remove('mode-active');
+document.getElementById('mode1').onclick = ()=>{
+    currentMode=1;
+    document.getElementById('mode1').classList.add('mode-active');
+    document.getElementById('mode3').classList.remove('mode-active');
     document.getElementById('mode2').classList.remove('mode-active');
-    tipTextDom.innerText = '模式C：按照指定規則重新排列字段順序，日期只保留月/日';
+    tipTextDom.innerText = '模式A：逗號轉Tab，複製直接貼Excel自動拆分儲存格';
 }
 
-//彈窗提示
 function showToast(text){
     toastDom.innerText = text;
     toastDom.classList.add('show');
     setTimeout(()=>toastDom.classList.remove('show'),1600);
 }
 
-//核心轉換函數
 function convert(){
     const raw = inputDom.value.trim();
     if(!raw){
@@ -217,42 +214,45 @@ function convert(){
     }
     const lines = raw.split(/\r?\n/);
     const resultArr = [];
+    let lineNo = 1; //流水號從1開始
 
     lines.forEach(line=>{
         const str = line.trim();
         if(!str) return;
-        const cells = str.split(',').map(item=>item.trim());
 
-        if(currentMode === 1){
-            //模式A , → Tab符號 \t
-            resultArr.push(cells.join('\t'));
-        }else if(currentMode === 2){
-            //模式B：Excel複製出來（tab分隔）轉換成逗號
-            const tabCells = str.split('\t');
-            resultArr.push(tabCells.join(','));
-        }else if(currentMode ===3){
-            // 處理日期：去掉年份，只保留月/日
-            let dateVal = cells[1] || '';
+        if(currentMode === 3){
+            // 步驟1：Excel Tab轉陣列
+            let cells = str.split('\t').map(item=>item.trim());
+            // 步驟2：開頭補流水號，變成完整9欄結構
+            let fullCells = [lineNo.toString(), ...cells];
+            // 步驟3：處理日期去掉年份
+            let dateVal = fullCells[1] || '';
             if(dateVal.includes('/')){
                 const dateParts = dateVal.split('/');
                 if(dateParts.length >=2){
                     dateVal = dateParts.slice(1).join('/');
                 }
             }
-            // 字段重排順序：互換5和9的位置
+            // 步驟4：字段重排，最後兩欄互換
             const order = [0,2,3,1,4,7,8,9,5];
             const newCells = order.map(i=>{
                 if(i === 1) return dateVal;
-                return cells[i] || '';
+                return fullCells[i] || '';
             });
             resultArr.push(newCells.join(','));
+            lineNo++;
+        }else if(currentMode === 2){
+            const tabCells = str.split('\t');
+            resultArr.push(tabCells.join(','));
+        }else if(currentMode === 1){
+            const cells = str.split(',').map(item=>item.trim());
+            resultArr.push(cells.join('\t'));
         }
     })
     outputDom.value = resultArr.join('\n');
     showToast('轉換完成！');
 }
 
-//複製輸出
 function copyResult(){
     if(!outputDom.value){
         showToast('沒有可複製內容');
@@ -263,7 +263,6 @@ function copyResult(){
     })
 }
 
-//清空
 function clearAll(){
     inputDom.value='';
     outputDom.value='';
