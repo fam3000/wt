@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
@@ -140,11 +139,11 @@ button{
 <div class="container">
     <h1>逗號資料 ⇄ Excel儲存格互轉工具</h1>
 
-<div class="card">
+    <div class="card">
         <div class="mode-wrap">
             <button id="mode1" class="mode-btn mode-active">模式A：逗號 → Excel多格（Tab分隔）</button>
             <button id="mode2" class="mode-btn btn-gray">模式B：Excel多格 → 逗號格式</button>
-            <button id="mode3" class="mode-btn btn-gray">模式C：移除【刪除這個】並重新數字排序</button>
+            <button id="mode3" class="mode-btn btn-gray">模式C：固定字段順序重排</button>
         </div>
         <div class="title-row">
             <h2>輸入區</h2>
@@ -152,14 +151,14 @@ button{
         <textarea id="inputArea" placeholder="貼入資料範例：
 1.PR,W131,8/4,S07,48732467,UT3,850,R48.0G334.001A
 2.WE,W131,8/4,S07,48732468,UT3,50,R48.0G334.001A
-模式C範例：1,4,2,3,5,刪除這個,9,6,7,8"></textarea>
+模式C範例：1,2026/8/31,MP,W101,S05,548.0B908.0011,B2026082600593,V10000551110,DGX,18"></textarea>
         <div class="btn-row">
             <button class="btn-primary" onclick="convert()">開始轉換</button>
             <button class="btn-gray" onclick="clearAll()">清空全部</button>
         </div>
     </div>
 
-<div class="card">
+    <div class="card">
         <div class="title-row">
             <h2>輸出結果</h2>
             <button class="btn-primary" onclick="copyResult()">一鍵複製結果</button>
@@ -177,8 +176,9 @@ const outputDom = document.getElementById('outputArea');
 const toastDom = document.getElementById('toast');
 const tipTextDom = document.getElementById('tipText');
 
-let currentMode = 1; //1=逗號轉Tab(Excel), 2=Excel轉逗號,3=過濾刪除這個+數字排序
+let currentMode = 1; //1=逗號轉Tab(Excel), 2=Excel轉逗號,3=固定字段重排
 
+// 模式切換
 document.getElementById('mode1').onclick = ()=>{
     currentMode=1;
     document.getElementById('mode1').classList.add('mode-active');
@@ -198,7 +198,7 @@ document.getElementById('mode3').onclick = ()=>{
     document.getElementById('mode3').classList.add('mode-active');
     document.getElementById('mode1').classList.remove('mode-active');
     document.getElementById('mode2').classList.remove('mode-active');
-    tipTextDom.innerText = '模式C：移除【刪除這個】項目，其餘轉數字重新升序排序，輸出逗號分隔';
+    tipTextDom.innerText = '模式C：按照指定規則重新排列字段順序，日期只保留月/日';
 }
 
 //彈窗提示
@@ -221,24 +221,31 @@ function convert(){
     lines.forEach(line=>{
         const str = line.trim();
         if(!str) return;
+        const cells = str.split(',').map(item=>item.trim());
 
         if(currentMode === 1){
             //模式A , → Tab符號 \t
-            const cells = str.split(',');
             resultArr.push(cells.join('\t'));
         }else if(currentMode === 2){
             //模式B：Excel複製出來（tab分隔）轉換成逗號
-            const cells = str.split('\t');
-            resultArr.push(cells.join(','));
+            const tabCells = str.split('\t');
+            resultArr.push(tabCells.join(','));
         }else if(currentMode ===3){
-            //模式C：過濾掉"刪除這個"，其餘轉數字，升序重新排列
-            let cells = str.split(',')
-                .map(item=>item.trim())
-                .filter(item=> item !== '刪除這個' && item!=='');
-            //轉數字排序
-            cells = cells.map(x=>Number(x)).filter(n=>!isNaN(n));
-            cells.sort((a,b)=>a-b);
-            resultArr.push(cells.join(','));
+            // 處理日期：去掉年份，只保留月/日
+            let dateVal = cells[1] || '';
+            if(dateVal.includes('/')){
+                const dateParts = dateVal.split('/');
+                if(dateParts.length >=2){
+                    dateVal = dateParts.slice(1).join('/');
+                }
+            }
+            // 字段重排順序：互換5和9的位置
+            const order = [0,2,3,1,4,7,8,9,5];
+            const newCells = order.map(i=>{
+                if(i === 1) return dateVal;
+                return cells[i] || '';
+            });
+            resultArr.push(newCells.join(','));
         }
     })
     outputDom.value = resultArr.join('\n');
@@ -262,6 +269,5 @@ function clearAll(){
     outputDom.value='';
 }
 </script>
-
 </body>
 </html>
